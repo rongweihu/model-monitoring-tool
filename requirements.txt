@@ -1,0 +1,52 @@
+# Web Framework
+flask==2.2.5
+flask-cors==4.0.0
+werkzeug==2.2.3
+flask-sqlalchemy==3.1.1
+gunicorn==21.2.0  # Production WSGI server
+
+# Database
+sqlalchemy==2.0.23
+
+# Data Analysis
+pandas==2.1.1
+numpy==1.23.5
+scipy==1.11.3
+scikit-learn==1.2.2
+statsmodels==0.14.0
+arch==6.1.0
+woe-binning==0.4.0
+
+# Visualization
+plotly==5.15.0
+
+# File Handling
+openpyxl==3.1.2
+
+# Utilities
+requests==2.31.0
+python-dateutil==2.8.2
+python-dotenv==1.0.0  # Environment variable management
+
+# Testing
+pytest==7.4.0
+pytest-cov==4.1.0
+
+# Documentation
+Sphinx==7.2.6  # For generating documentation
+
+# Frontend Dependencies (Node.js packages - for reference only)
+# These should be installed using npm in the frontend directory
+# ============================================================
+# react==18.2.0
+# react-dom==18.2.0
+# typescript==5.2.2
+# @mui/material==5.14.5
+# @mui/icons-material==5.14.5
+# @emotion/react==11.11.1
+# @emotion/styled==11.11.0
+# recharts==2.10.4
+# axios==1.6.2
+# react-router-dom==6.20.0
+# notistack==3.0.1
+# vite==5.0.0

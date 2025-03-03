@@ -1,0 +1,556 @@
+0 verbose cli /usr/local/bin/node /usr/local/bin/npm
+1 info using npm@10.9.2
+2 info using node@v22.13.1
+3 silly config load:file:/usr/local/lib/node_modules/npm/npmrc
+4 silly config load:file:/Users/rongweihu/model_monitoring_tool/frontend/.npmrc
+5 silly config load:file:/Users/rongweihu/.npmrc
+6 silly config load:file:/usr/local/etc/npmrc
+7 verbose title npm install @types/semver
+8 verbose argv "install" "--save-dev" "@types/semver" "--cache" "./npm-cache"
+9 verbose logfile logs-max:10 dir:/Users/rongweihu/model_monitoring_tool/frontend/npm-cache/_logs/2025-01-29T18_41_57_581Z-
+10 verbose logfile /Users/rongweihu/model_monitoring_tool/frontend/npm-cache/_logs/2025-01-29T18_41_57_581Z-debug-0.log
+11 silly logfile done cleaning log files
+12 silly packumentCache heap:4345298944 maxSize:1086324736 maxEntrySize:543162368
+13 silly idealTree buildDeps
+14 silly fetch manifest @types/semver@*
+15 silly packumentCache full:https://registry.npmjs.org/@types%2fsemver cache-miss
+16 verbose shrinkwrap failed to load node_modules/.package-lock.json out of date, updated: node_modules
+17 http fetch GET 200 https://registry.npmjs.org/@types%2fsemver 777ms (cache updated)
+18 silly packumentCache full:https://registry.npmjs.org/@types%2fsemver set size:undefined disposed:false
+19 silly placeDep ROOT @types/semver@7.5.8 REPLACE for: frontend@0.0.0 want: *
+20 silly reify moves {}
+21 silly audit bulk request {
+21 silly audit   '@ampproject/remapping': [ '2.3.0' ],
+21 silly audit   '@babel/code-frame': [ '7.26.2' ],
+21 silly audit   '@babel/compat-data': [ '7.26.5' ],
+21 silly audit   '@babel/core': [ '7.26.7' ],
+21 silly audit   'convert-source-map': [ '2.0.0', '1.9.0' ],
+21 silly audit   semver: [ '6.3.1', '7.7.0' ],
+21 silly audit   '@babel/generator': [ '7.26.5' ],
+21 silly audit   '@babel/helper-compilation-targets': [ '7.26.5' ],
+21 silly audit   '@babel/helper-module-imports': [ '7.25.9' ],
+21 silly audit   '@babel/helper-module-transforms': [ '7.26.0' ],
+21 silly audit   '@babel/helper-plugin-utils': [ '7.26.5' ],
+21 silly audit   '@babel/helper-string-parser': [ '7.25.9' ],
+21 silly audit   '@babel/helper-validator-identifier': [ '7.25.9' ],
+21 silly audit   '@babel/helper-validator-option': [ '7.25.9' ],
+21 silly audit   '@babel/helpers': [ '7.26.7' ],
+21 silly audit   '@babel/parser': [ '7.26.7' ],
+21 silly audit   '@babel/plugin-transform-react-jsx-self': [ '7.25.9' ],
+21 silly audit   '@babel/plugin-transform-react-jsx-source': [ '7.25.9' ],
+21 silly audit   '@babel/runtime': [ '7.26.7' ],
+21 silly audit   '@babel/template': [ '7.25.9' ],
+21 silly audit   '@babel/traverse': [ '7.26.7' ],
+21 silly audit   '@babel/types': [ '7.26.7' ],
+21 silly audit   '@emotion/babel-plugin': [ '11.13.5' ],
+21 silly audit   '@emotion/cache': [ '11.14.0' ],
+21 silly audit   '@emotion/hash': [ '0.9.2' ],
+21 silly audit   '@emotion/is-prop-valid': [ '1.3.1' ],
+21 silly audit   '@emotion/memoize': [ '0.9.0' ],
+21 silly audit   '@emotion/react': [ '11.14.0' ],
+21 silly audit   '@emotion/serialize': [ '1.3.3' ],
+21 silly audit   '@emotion/sheet': [ '1.4.0' ],
+21 silly audit   '@emotion/styled': [ '11.14.0' ],
+21 silly audit   '@emotion/unitless': [ '0.10.0' ],
+21 silly audit   '@emotion/use-insertion-effect-with-fallbacks': [ '1.2.0' ],
+21 silly audit   '@emotion/utils': [ '1.4.2' ],
+21 silly audit   '@emotion/weak-memoize': [ '0.4.0' ],
+21 silly audit   '@esbuild/aix-ppc64': [ '0.21.5' ],
+21 silly audit   '@esbuild/android-arm': [ '0.21.5' ],
+21 silly audit   '@esbuild/android-arm64': [ '0.21.5' ],
+21 silly audit   '@esbuild/android-x64': [ '0.21.5' ],
+21 silly audit   '@esbuild/darwin-arm64': [ '0.21.5' ],
+21 silly audit   '@esbuild/darwin-x64': [ '0.21.5' ],
+21 silly audit   '@esbuild/freebsd-arm64': [ '0.21.5' ],
+21 silly audit   '@esbuild/freebsd-x64': [ '0.21.5' ],
+21 silly audit   '@esbuild/linux-arm': [ '0.21.5' ],
+21 silly audit   '@esbuild/linux-arm64': [ '0.21.5' ],
+21 silly audit   '@esbuild/linux-ia32': [ '0.21.5' ],
+21 silly audit   '@esbuild/linux-loong64': [ '0.21.5' ],
+21 silly audit   '@esbuild/linux-mips64el': [ '0.21.5' ],
+21 silly audit   '@esbuild/linux-ppc64': [ '0.21.5' ],
+21 silly audit   '@esbuild/linux-riscv64': [ '0.21.5' ],
+21 silly audit   '@esbuild/linux-s390x': [ '0.21.5' ],
+21 silly audit   '@esbuild/linux-x64': [ '0.21.5' ],
+21 silly audit   '@esbuild/netbsd-x64': [ '0.21.5' ],
+21 silly audit   '@esbuild/openbsd-x64': [ '0.21.5' ],
+21 silly audit   '@esbuild/sunos-x64': [ '0.21.5' ],
+21 silly audit   '@esbuild/win32-arm64': [ '0.21.5' ],
+21 silly audit   '@esbuild/win32-ia32': [ '0.21.5' ],
+21 silly audit   '@esbuild/win32-x64': [ '0.21.5' ],
+21 silly audit   '@eslint-community/eslint-utils': [ '4.4.1' ],
+21 silly audit   '@eslint-community/regexpp': [ '4.12.1' ],
+21 silly audit   '@eslint/eslintrc': [ '2.1.4' ],
+21 silly audit   'brace-expansion': [ '1.1.11', '2.0.1' ],
+21 silly audit   globals: [ '13.24.0', '11.12.0' ],
+21 silly audit   minimatch: [ '3.1.2', '9.0.3' ],
+21 silly audit   '@eslint/js': [ '8.57.1' ],
+21 silly audit   '@humanwhocodes/config-array': [ '0.13.0' ],
+21 silly audit   '@humanwhocodes/module-importer': [ '1.0.1' ],
+21 silly audit   '@humanwhocodes/object-schema': [ '2.0.3' ],
+21 silly audit   '@jridgewell/gen-mapping': [ '0.3.8' ],
+21 silly audit   '@jridgewell/resolve-uri': [ '3.1.2' ],
+21 silly audit   '@jridgewell/set-array': [ '1.2.1' ],
+21 silly audit   '@jridgewell/sourcemap-codec': [ '1.5.0' ],
+21 silly audit   '@jridgewell/trace-mapping': [ '0.3.25' ],
+21 silly audit   '@mui/core-downloads-tracker': [ '5.16.14' ],
+21 silly audit   '@mui/icons-material': [ '5.16.14' ],
+21 silly audit   '@mui/material': [ '5.16.14' ],
+21 silly audit   '@mui/private-theming': [ '5.16.14' ],
+21 silly audit   '@mui/styled-engine': [ '5.16.14' ],
+21 silly audit   '@mui/system': [ '5.16.14' ],
+21 silly audit   '@mui/types': [ '7.2.21' ],
+21 silly audit   '@mui/utils': [ '5.16.14' ],
+21 silly audit   '@nodelib/fs.scandir': [ '2.1.5' ],
+21 silly audit   '@nodelib/fs.stat': [ '2.0.5' ],
+21 silly audit   '@nodelib/fs.walk': [ '1.2.8' ],
+21 silly audit   '@popperjs/core': [ '2.11.8' ],
+21 silly audit   '@remix-run/router': [ '1.21.1' ],
+21 silly audit   '@rollup/rollup-android-arm-eabi': [ '4.32.1' ],
+21 silly audit   '@rollup/rollup-android-arm64': [ '4.32.1' ],
+21 silly audit   '@rollup/rollup-darwin-arm64': [ '4.32.1' ],
+21 silly audit   '@rollup/rollup-darwin-x64': [ '4.32.1' ],
+21 silly audit   '@rollup/rollup-freebsd-arm64': [ '4.32.1' ],
+21 silly audit   '@rollup/rollup-freebsd-x64': [ '4.32.1' ],
+21 silly audit   '@rollup/rollup-linux-arm-gnueabihf': [ '4.32.1' ],
+21 silly audit   '@rollup/rollup-linux-arm-musleabihf': [ '4.32.1' ],
+21 silly audit   '@rollup/rollup-linux-arm64-gnu': [ '4.32.1' ],
+21 silly audit   '@rollup/rollup-linux-arm64-musl': [ '4.32.1' ],
+21 silly audit   '@rollup/rollup-linux-loongarch64-gnu': [ '4.32.1' ],
+21 silly audit   '@rollup/rollup-linux-powerpc64le-gnu': [ '4.32.1' ],
+21 silly audit   '@rollup/rollup-linux-riscv64-gnu': [ '4.32.1' ],
+21 silly audit   '@rollup/rollup-linux-s390x-gnu': [ '4.32.1' ],
+21 silly audit   '@rollup/rollup-linux-x64-gnu': [ '4.32.1' ],
+21 silly audit   '@rollup/rollup-linux-x64-musl': [ '4.32.1' ],
+21 silly audit   '@rollup/rollup-win32-arm64-msvc': [ '4.32.1' ],
+21 silly audit   '@rollup/rollup-win32-ia32-msvc': [ '4.32.1' ],
+21 silly audit   '@rollup/rollup-win32-x64-msvc': [ '4.32.1' ],
+21 silly audit   '@types/axios': [ '0.9.36' ],
+21 silly audit   '@types/babel__core': [ '7.20.5' ],
+21 silly audit   '@types/babel__generator': [ '7.6.8' ],
+21 silly audit   '@types/babel__template': [ '7.4.4' ],
+21 silly audit   '@types/babel__traverse': [ '7.20.6' ],
+21 silly audit   '@types/d3-array': [ '3.2.1' ],
+21 silly audit   '@types/d3-color': [ '3.1.3' ],
+21 silly audit   '@types/d3-ease': [ '3.0.2' ],
+21 silly audit   '@types/d3-interpolate': [ '3.0.4' ],
+21 silly audit   '@types/d3-path': [ '3.1.0' ],
+21 silly audit   '@types/d3-scale': [ '4.0.8' ],
+21 silly audit   '@types/d3-shape': [ '3.1.7' ],
+21 silly audit   '@types/d3-time': [ '3.0.4' ],
+21 silly audit   '@types/d3-timer': [ '3.0.2' ],
+21 silly audit   '@types/estree': [ '1.0.6' ],
+21 silly audit   '@types/history': [ '4.7.11' ],
+21 silly audit   '@types/json-schema': [ '7.0.15' ],
+21 silly audit   '@types/parse-json': [ '4.0.2' ],
+21 silly audit   '@types/prop-types': [ '15.7.14' ],
+21 silly audit   '@types/react': [ '18.3.18' ],
+21 silly audit   '@types/react-dom': [ '18.3.5' ],
+21 silly audit   '@types/react-router': [ '5.1.20' ],
+21 silly audit   '@types/react-router-dom': [ '5.3.3' ],
+21 silly audit   '@types/react-transition-group': [ '4.4.12' ],
+21 silly audit   '@typescript-eslint/eslint-plugin': [ '6.21.0' ],
+21 silly audit   '@typescript-eslint/parser': [ '6.21.0' ],
+21 silly audit   '@typescript-eslint/scope-manager': [ '6.21.0' ],
+21 silly audit   '@typescript-eslint/type-utils': [ '6.21.0' ],
+21 silly audit   '@typescript-eslint/types': [ '6.21.0' ],
+21 silly audit   '@typescript-eslint/typescript-estree': [ '6.21.0' ],
+21 silly audit   '@typescript-eslint/utils': [ '6.21.0' ],
+21 silly audit   '@typescript-eslint/visitor-keys': [ '6.21.0' ],
+21 silly audit   '@ungap/structured-clone': [ '1.3.0' ],
+21 silly audit   '@vitejs/plugin-react': [ '4.3.4' ],
+21 silly audit   acorn: [ '8.14.0' ],
+21 silly audit   'acorn-jsx': [ '5.3.2' ],
+21 silly audit   ajv: [ '6.12.6' ],
+21 silly audit   'ansi-regex': [ '5.0.1' ],
+21 silly audit   'ansi-styles': [ '4.3.0' ],
+21 silly audit   argparse: [ '2.0.1' ],
+21 silly audit   'array-union': [ '2.1.0' ],
+21 silly audit   asynckit: [ '0.4.0' ],
+21 silly audit   axios: [ '1.7.9' ],
+21 silly audit   'babel-plugin-macros': [ '3.1.0' ],
+21 silly audit   'balanced-match': [ '1.0.2' ],
+21 silly audit   braces: [ '3.0.3' ],
+21 silly audit   browserslist: [ '4.24.4' ],
+21 silly audit   callsites: [ '3.1.0' ],
+21 silly audit   'caniuse-lite': [ '1.0.30001696' ],
+21 silly audit   chalk: [ '4.1.2' ],
+21 silly audit   clsx: [ '2.1.1' ],
+21 silly audit   'color-convert': [ '2.0.1' ],
+21 silly audit   'color-name': [ '1.1.4' ],
+21 silly audit   'combined-stream': [ '1.0.8' ],
+21 silly audit   'concat-map': [ '0.0.1' ],
+21 silly audit   cosmiconfig: [ '7.1.0' ],
+21 silly audit   'cross-spawn': [ '7.0.6' ],
+21 silly audit   csstype: [ '3.1.3' ],
+21 silly audit   'd3-array': [ '3.2.4' ],
+21 silly audit   'd3-color': [ '3.1.0' ],
+21 silly audit   'd3-ease': [ '3.0.1' ],
+21 silly audit   'd3-format': [ '3.1.0' ],
+21 silly audit   'd3-interpolate': [ '3.0.1' ],
+21 silly audit   'd3-path': [ '3.1.0' ],
+21 silly audit   'd3-scale': [ '4.0.2' ],
+21 silly audit   'd3-shape': [ '3.2.0' ],
+21 silly audit   'd3-time': [ '3.1.0' ],
+21 silly audit   'd3-time-format': [ '4.1.0' ],
+21 silly audit   'd3-timer': [ '3.0.1' ],
+21 silly audit   debug: [ '4.4.0' ],
+21 silly audit   'decimal.js-light': [ '2.5.1' ],
+21 silly audit   'deep-is': [ '0.1.4' ],
+21 silly audit   'delayed-stream': [ '1.0.0' ],
+21 silly audit   'dir-glob': [ '3.0.1' ],
+21 silly audit   doctrine: [ '3.0.0' ],
+21 silly audit   'dom-helpers': [ '5.2.1' ],
+21 silly audit   'electron-to-chromium': [ '1.5.88' ],
+21 silly audit   'error-ex': [ '1.3.2' ],
+21 silly audit   esbuild: [ '0.21.5' ],
+21 silly audit   escalade: [ '3.2.0' ],
+21 silly audit   'escape-string-regexp': [ '4.0.0' ],
+21 silly audit   eslint: [ '8.57.1' ],
+21 silly audit   'eslint-plugin-react-hooks': [ '4.6.2' ],
+21 silly audit   'eslint-plugin-react-refresh': [ '0.4.18' ],
+21 silly audit   'eslint-scope': [ '7.2.2' ],
+21 silly audit   'eslint-visitor-keys': [ '3.4.3' ],
+21 silly audit   espree: [ '9.6.1' ],
+21 silly audit   esquery: [ '1.6.0' ],
+21 silly audit   esrecurse: [ '4.3.0' ],
+21 silly audit   estraverse: [ '5.3.0' ],
+21 silly audit   esutils: [ '2.0.3' ],
+21 silly audit   eventemitter3: [ '4.0.7' ],
+21 silly audit   'fast-deep-equal': [ '3.1.3' ],
+21 silly audit   'fast-equals': [ '5.2.2' ],
+21 silly audit   'fast-glob': [ '3.3.3' ],
+21 silly audit   'glob-parent': [ '5.1.2', '6.0.2' ],
+21 silly audit   'fast-json-stable-stringify': [ '2.1.0' ],
+21 silly audit   'fast-levenshtein': [ '2.0.6' ],
+21 silly audit   fastq: [ '1.18.0' ],
+21 silly audit   'file-entry-cache': [ '6.0.1' ],
+21 silly audit   'fill-range': [ '7.1.1' ],
+21 silly audit   'find-root': [ '1.1.0' ],
+21 silly audit   'find-up': [ '5.0.0' ],
+21 silly audit   'flat-cache': [ '3.2.0' ],
+21 silly audit   flatted: [ '3.3.2' ],
+21 silly audit   'follow-redirects': [ '1.15.9' ],
+21 silly audit   'form-data': [ '4.0.1' ],
+21 silly audit   'fs.realpath': [ '1.0.0' ],
+21 silly audit   fsevents: [ '2.3.3' ],
+21 silly audit   'function-bind': [ '1.1.2' ],
+21 silly audit   gensync: [ '1.0.0-beta.2' ],
+21 silly audit   glob: [ '7.2.3' ],
+21 silly audit   globby: [ '11.1.0' ],
+21 silly audit   graphemer: [ '1.4.0' ],
+21 silly audit   'has-flag': [ '4.0.0' ],
+21 silly audit   hasown: [ '2.0.2' ],
+21 silly audit   'hoist-non-react-statics': [ '3.3.2' ],
+21 silly audit   'react-is': [ '16.13.1', '19.0.0', '18.3.1' ],
+21 silly audit   ignore: [ '5.3.2' ],
+21 silly audit   'import-fresh': [ '3.3.0' ],
+21 silly audit   imurmurhash: [ '0.1.4' ],
+21 silly audit   inflight: [ '1.0.6' ],
+21 silly audit   inherits: [ '2.0.4' ],
+21 silly audit   internmap: [ '2.0.3' ],
+21 silly audit   'is-arrayish': [ '0.2.1' ],
+21 silly audit   'is-core-module': [ '2.16.1' ],
+21 silly audit   'is-extglob': [ '2.1.1' ],
+21 silly audit   'is-glob': [ '4.0.3' ],
+21 silly audit   'is-number': [ '7.0.0' ],
+21 silly audit   'is-path-inside': [ '3.0.3' ],
+21 silly audit   isexe: [ '2.0.0' ],
+21 silly audit   'js-tokens': [ '4.0.0' ],
+21 silly audit   'js-yaml': [ '4.1.0' ],
+21 silly audit   jsesc: [ '3.1.0' ],
+21 silly audit   'json-buffer': [ '3.0.1' ],
+21 silly audit   'json-parse-even-better-errors': [ '2.3.1' ],
+21 silly audit   'json-schema-traverse': [ '0.4.1' ],
+21 silly audit   'json-stable-stringify-without-jsonify': [ '1.0.1' ],
+21 silly audit   json5: [ '2.2.3' ],
+21 silly audit   keyv: [ '4.5.4' ],
+21 silly audit   levn: [ '0.4.1' ],
+21 silly audit   'lines-and-columns': [ '1.2.4' ],
+21 silly audit   'locate-path': [ '6.0.0' ],
+21 silly audit   lodash: [ '4.17.21' ],
+21 silly audit   'lodash.merge': [ '4.6.2' ],
+21 silly audit   'loose-envify': [ '1.4.0' ],
+21 silly audit   'lru-cache': [ '5.1.1' ],
+21 silly audit   merge2: [ '1.4.1' ],
+21 silly audit   micromatch: [ '4.0.8' ],
+21 silly audit   'mime-db': [ '1.52.0' ],
+21 silly audit   'mime-types': [ '2.1.35' ],
+21 silly audit   ms: [ '2.1.3' ],
+21 silly audit   nanoid: [ '3.3.8' ],
+21 silly audit   'natural-compare': [ '1.4.0' ],
+21 silly audit   'node-releases': [ '2.0.19' ],
+21 silly audit   'object-assign': [ '4.1.1' ],
+21 silly audit   once: [ '1.4.0' ],
+21 silly audit   optionator: [ '0.9.4' ],
+21 silly audit   'p-limit': [ '3.1.0' ],
+21 silly audit   'p-locate': [ '5.0.0' ],
+21 silly audit   'parent-module': [ '1.0.1' ],
+21 silly audit   'parse-json': [ '5.2.0' ],
+21 silly audit   'path-exists': [ '4.0.0' ],
+21 silly audit   'path-is-absolute': [ '1.0.1' ],
+21 silly audit   'path-key': [ '3.1.1' ],
+21 silly audit   'path-parse': [ '1.0.7' ],
+21 silly audit   'path-type': [ '4.0.0' ],
+21 silly audit   picocolors: [ '1.1.1' ],
+21 silly audit   picomatch: [ '2.3.1' ],
+21 silly audit   postcss: [ '8.5.1' ],
+21 silly audit   'prelude-ls': [ '1.2.1' ],
+21 silly audit   'prop-types': [ '15.8.1' ],
+21 silly audit   'proxy-from-env': [ '1.1.0' ],
+21 silly audit   punycode: [ '2.3.1' ],
+21 silly audit   'queue-microtask': [ '1.2.3' ],
+21 silly audit   react: [ '18.3.1' ],
+21 silly audit   'react-dom': [ '18.3.1' ],
+21 silly audit   'react-refresh': [ '0.14.2' ],
+21 silly audit   'react-router': [ '6.28.2' ],
+21 silly audit   'react-router-dom': [ '6.28.2' ],
+21 silly audit   'react-smooth': [ '4.0.4' ],
+21 silly audit   'react-transition-group': [ '4.4.5' ],
+21 silly audit   recharts: [ '2.15.1' ],
+21 silly audit   'recharts-scale': [ '0.4.5' ],
+21 silly audit   'regenerator-runtime': [ '0.14.1' ],
+21 silly audit   resolve: [ '1.22.10' ],
+21 silly audit   'resolve-from': [ '4.0.0' ],
+21 silly audit   reusify: [ '1.0.4' ],
+21 silly audit   rimraf: [ '3.0.2' ],
+21 silly audit   rollup: [ '4.32.1' ],
+21 silly audit   'run-parallel': [ '1.2.0' ],
+21 silly audit   scheduler: [ '0.23.2' ],
+21 silly audit   'shebang-command': [ '2.0.0' ],
+21 silly audit   'shebang-regex': [ '3.0.0' ],
+21 silly audit   slash: [ '3.0.0' ],
+21 silly audit   'source-map': [ '0.5.7' ],
+21 silly audit   'source-map-js': [ '1.2.1' ],
+21 silly audit   'strip-ansi': [ '6.0.1' ],
+21 silly audit   'strip-json-comments': [ '3.1.1' ],
+21 silly audit   stylis: [ '4.2.0' ],
+21 silly audit   'supports-color': [ '7.2.0' ],
+21 silly audit   'supports-preserve-symlinks-flag': [ '1.0.0' ],
+21 silly audit   'text-table': [ '0.2.0' ],
+21 silly audit   'tiny-invariant': [ '1.3.3' ],
+21 silly audit   'to-regex-range': [ '5.0.1' ],
+21 silly audit   'ts-api-utils': [ '1.4.3' ],
+21 silly audit   'type-check': [ '0.4.0' ],
+21 silly audit   'type-fest': [ '0.20.2' ],
+21 silly audit   typescript: [ '5.7.3' ],
+21 silly audit   'update-browserslist-db': [ '1.1.2' ],
+21 silly audit   'uri-js': [ '4.4.1' ],
+21 silly audit   'victory-vendor': [ '36.9.2' ],
+21 silly audit   vite: [ '5.4.14' ],
+21 silly audit   which: [ '2.0.2' ],
+21 silly audit   'word-wrap': [ '1.2.5' ],
+21 silly audit   wrappy: [ '1.0.2' ],
+21 silly audit   yallist: [ '3.1.1' ],
+21 silly audit   yaml: [ '1.10.2' ],
+21 silly audit   'yocto-queue': [ '0.1.0' ],
+21 silly audit   '@types/semver': [ '7.5.8' ]
+21 silly audit }
+22 verbose reify failed optional dependency /Users/rongweihu/model_monitoring_tool/frontend/node_modules/@rollup/rollup-win32-x64-msvc
+23 silly reify mark deleted [
+23 silly reify   '/Users/rongweihu/model_monitoring_tool/frontend/node_modules/@rollup/rollup-win32-x64-msvc'
+23 silly reify ]
+24 verbose reify failed optional dependency /Users/rongweihu/model_monitoring_tool/frontend/node_modules/@rollup/rollup-win32-ia32-msvc
+25 silly reify mark deleted [
+25 silly reify   '/Users/rongweihu/model_monitoring_tool/frontend/node_modules/@rollup/rollup-win32-ia32-msvc'
+25 silly reify ]
+26 verbose reify failed optional dependency /Users/rongweihu/model_monitoring_tool/frontend/node_modules/@rollup/rollup-win32-arm64-msvc
+27 silly reify mark deleted [
+27 silly reify   '/Users/rongweihu/model_monitoring_tool/frontend/node_modules/@rollup/rollup-win32-arm64-msvc'
+27 silly reify ]
+28 verbose reify failed optional dependency /Users/rongweihu/model_monitoring_tool/frontend/node_modules/@rollup/rollup-linux-x64-musl
+29 silly reify mark deleted [
+29 silly reify   '/Users/rongweihu/model_monitoring_tool/frontend/node_modules/@rollup/rollup-linux-x64-musl'
+29 silly reify ]
+30 verbose reify failed optional dependency /Users/rongweihu/model_monitoring_tool/frontend/node_modules/@rollup/rollup-linux-x64-gnu
+31 silly reify mark deleted [
+31 silly reify   '/Users/rongweihu/model_monitoring_tool/frontend/node_modules/@rollup/rollup-linux-x64-gnu'
+31 silly reify ]
+32 verbose reify failed optional dependency /Users/rongweihu/model_monitoring_tool/frontend/node_modules/@rollup/rollup-linux-s390x-gnu
+33 silly reify mark deleted [
+33 silly reify   '/Users/rongweihu/model_monitoring_tool/frontend/node_modules/@rollup/rollup-linux-s390x-gnu'
+33 silly reify ]
+34 verbose reify failed optional dependency /Users/rongweihu/model_monitoring_tool/frontend/node_modules/@rollup/rollup-linux-riscv64-gnu
+35 silly reify mark deleted [
+35 silly reify   '/Users/rongweihu/model_monitoring_tool/frontend/node_modules/@rollup/rollup-linux-riscv64-gnu'
+35 silly reify ]
+36 verbose reify failed optional dependency /Users/rongweihu/model_monitoring_tool/frontend/node_modules/@rollup/rollup-linux-powerpc64le-gnu
+37 silly reify mark deleted [
+37 silly reify   '/Users/rongweihu/model_monitoring_tool/frontend/node_modules/@rollup/rollup-linux-powerpc64le-gnu'
+37 silly reify ]
+38 verbose reify failed optional dependency /Users/rongweihu/model_monitoring_tool/frontend/node_modules/@rollup/rollup-linux-loongarch64-gnu
+39 silly reify mark deleted [
+39 silly reify   '/Users/rongweihu/model_monitoring_tool/frontend/node_modules/@rollup/rollup-linux-loongarch64-gnu'
+39 silly reify ]
+40 verbose reify failed optional dependency /Users/rongweihu/model_monitoring_tool/frontend/node_modules/@rollup/rollup-linux-arm64-musl
+41 silly reify mark deleted [
+41 silly reify   '/Users/rongweihu/model_monitoring_tool/frontend/node_modules/@rollup/rollup-linux-arm64-musl'
+41 silly reify ]
+42 verbose reify failed optional dependency /Users/rongweihu/model_monitoring_tool/frontend/node_modules/@rollup/rollup-linux-arm64-gnu
+43 silly reify mark deleted [
+43 silly reify   '/Users/rongweihu/model_monitoring_tool/frontend/node_modules/@rollup/rollup-linux-arm64-gnu'
+43 silly reify ]
+44 verbose reify failed optional dependency /Users/rongweihu/model_monitoring_tool/frontend/node_modules/@rollup/rollup-linux-arm-musleabihf
+45 silly reify mark deleted [
+45 silly reify   '/Users/rongweihu/model_monitoring_tool/frontend/node_modules/@rollup/rollup-linux-arm-musleabihf'
+45 silly reify ]
+46 verbose reify failed optional dependency /Users/rongweihu/model_monitoring_tool/frontend/node_modules/@rollup/rollup-linux-arm-gnueabihf
+47 silly reify mark deleted [
+47 silly reify   '/Users/rongweihu/model_monitoring_tool/frontend/node_modules/@rollup/rollup-linux-arm-gnueabihf'
+47 silly reify ]
+48 verbose reify failed optional dependency /Users/rongweihu/model_monitoring_tool/frontend/node_modules/@rollup/rollup-freebsd-x64
+49 silly reify mark deleted [
+49 silly reify   '/Users/rongweihu/model_monitoring_tool/frontend/node_modules/@rollup/rollup-freebsd-x64'
+49 silly reify ]
+50 verbose reify failed optional dependency /Users/rongweihu/model_monitoring_tool/frontend/node_modules/@rollup/rollup-freebsd-arm64
+51 silly reify mark deleted [
+51 silly reify   '/Users/rongweihu/model_monitoring_tool/frontend/node_modules/@rollup/rollup-freebsd-arm64'
+51 silly reify ]
+52 verbose reify failed optional dependency /Users/rongweihu/model_monitoring_tool/frontend/node_modules/@rollup/rollup-darwin-x64
+53 silly reify mark deleted [
+53 silly reify   '/Users/rongweihu/model_monitoring_tool/frontend/node_modules/@rollup/rollup-darwin-x64'
+53 silly reify ]
+54 verbose reify failed optional dependency /Users/rongweihu/model_monitoring_tool/frontend/node_modules/@rollup/rollup-android-arm64
+55 silly reify mark deleted [
+55 silly reify   '/Users/rongweihu/model_monitoring_tool/frontend/node_modules/@rollup/rollup-android-arm64'
+55 silly reify ]
+56 verbose reify failed optional dependency /Users/rongweihu/model_monitoring_tool/frontend/node_modules/@rollup/rollup-android-arm-eabi
+57 silly reify mark deleted [
+57 silly reify   '/Users/rongweihu/model_monitoring_tool/frontend/node_modules/@rollup/rollup-android-arm-eabi'
+57 silly reify ]
+58 verbose reify failed optional dependency /Users/rongweihu/model_monitoring_tool/frontend/node_modules/@esbuild/win32-x64
+59 silly reify mark deleted [
+59 silly reify   '/Users/rongweihu/model_monitoring_tool/frontend/node_modules/@esbuild/win32-x64'
+59 silly reify ]
+60 verbose reify failed optional dependency /Users/rongweihu/model_monitoring_tool/frontend/node_modules/@esbuild/win32-ia32
+61 silly reify mark deleted [
+61 silly reify   '/Users/rongweihu/model_monitoring_tool/frontend/node_modules/@esbuild/win32-ia32'
+61 silly reify ]
+62 verbose reify failed optional dependency /Users/rongweihu/model_monitoring_tool/frontend/node_modules/@esbuild/win32-arm64
+63 silly reify mark deleted [
+63 silly reify   '/Users/rongweihu/model_monitoring_tool/frontend/node_modules/@esbuild/win32-arm64'
+63 silly reify ]
+64 verbose reify failed optional dependency /Users/rongweihu/model_monitoring_tool/frontend/node_modules/@esbuild/sunos-x64
+65 silly reify mark deleted [
+65 silly reify   '/Users/rongweihu/model_monitoring_tool/frontend/node_modules/@esbuild/sunos-x64'
+65 silly reify ]
+66 verbose reify failed optional dependency /Users/rongweihu/model_monitoring_tool/frontend/node_modules/@esbuild/openbsd-x64
+67 silly reify mark deleted [
+67 silly reify   '/Users/rongweihu/model_monitoring_tool/frontend/node_modules/@esbuild/openbsd-x64'
+67 silly reify ]
+68 verbose reify failed optional dependency /Users/rongweihu/model_monitoring_tool/frontend/node_modules/@esbuild/netbsd-x64
+69 silly reify mark deleted [
+69 silly reify   '/Users/rongweihu/model_monitoring_tool/frontend/node_modules/@esbuild/netbsd-x64'
+69 silly reify ]
+70 verbose reify failed optional dependency /Users/rongweihu/model_monitoring_tool/frontend/node_modules/@esbuild/linux-x64
+71 silly reify mark deleted [
+71 silly reify   '/Users/rongweihu/model_monitoring_tool/frontend/node_modules/@esbuild/linux-x64'
+71 silly reify ]
+72 verbose reify failed optional dependency /Users/rongweihu/model_monitoring_tool/frontend/node_modules/@esbuild/linux-s390x
+73 silly reify mark deleted [
+73 silly reify   '/Users/rongweihu/model_monitoring_tool/frontend/node_modules/@esbuild/linux-s390x'
+73 silly reify ]
+74 verbose reify failed optional dependency /Users/rongweihu/model_monitoring_tool/frontend/node_modules/@esbuild/linux-riscv64
+75 silly reify mark deleted [
+75 silly reify   '/Users/rongweihu/model_monitoring_tool/frontend/node_modules/@esbuild/linux-riscv64'
+75 silly reify ]
+76 verbose reify failed optional dependency /Users/rongweihu/model_monitoring_tool/frontend/node_modules/@esbuild/linux-ppc64
+77 silly reify mark deleted [
+77 silly reify   '/Users/rongweihu/model_monitoring_tool/frontend/node_modules/@esbuild/linux-ppc64'
+77 silly reify ]
+78 verbose reify failed optional dependency /Users/rongweihu/model_monitoring_tool/frontend/node_modules/@esbuild/linux-mips64el
+79 silly reify mark deleted [
+79 silly reify   '/Users/rongweihu/model_monitoring_tool/frontend/node_modules/@esbuild/linux-mips64el'
+79 silly reify ]
+80 verbose reify failed optional dependency /Users/rongweihu/model_monitoring_tool/frontend/node_modules/@esbuild/linux-loong64
+81 silly reify mark deleted [
+81 silly reify   '/Users/rongweihu/model_monitoring_tool/frontend/node_modules/@esbuild/linux-loong64'
+81 silly reify ]
+82 verbose reify failed optional dependency /Users/rongweihu/model_monitoring_tool/frontend/node_modules/@esbuild/linux-ia32
+83 silly reify mark deleted [
+83 silly reify   '/Users/rongweihu/model_monitoring_tool/frontend/node_modules/@esbuild/linux-ia32'
+83 silly reify ]
+84 verbose reify failed optional dependency /Users/rongweihu/model_monitoring_tool/frontend/node_modules/@esbuild/linux-arm64
+85 silly reify mark deleted [
+85 silly reify   '/Users/rongweihu/model_monitoring_tool/frontend/node_modules/@esbuild/linux-arm64'
+85 silly reify ]
+86 verbose reify failed optional dependency /Users/rongweihu/model_monitoring_tool/frontend/node_modules/@esbuild/linux-arm
+87 silly reify mark deleted [
+87 silly reify   '/Users/rongweihu/model_monitoring_tool/frontend/node_modules/@esbuild/linux-arm'
+87 silly reify ]
+88 verbose reify failed optional dependency /Users/rongweihu/model_monitoring_tool/frontend/node_modules/@esbuild/freebsd-x64
+89 silly reify mark deleted [
+89 silly reify   '/Users/rongweihu/model_monitoring_tool/frontend/node_modules/@esbuild/freebsd-x64'
+89 silly reify ]
+90 verbose reify failed optional dependency /Users/rongweihu/model_monitoring_tool/frontend/node_modules/@esbuild/freebsd-arm64
+91 silly reify mark deleted [
+91 silly reify   '/Users/rongweihu/model_monitoring_tool/frontend/node_modules/@esbuild/freebsd-arm64'
+91 silly reify ]
+92 verbose reify failed optional dependency /Users/rongweihu/model_monitoring_tool/frontend/node_modules/@esbuild/darwin-x64
+93 silly reify mark deleted [
+93 silly reify   '/Users/rongweihu/model_monitoring_tool/frontend/node_modules/@esbuild/darwin-x64'
+93 silly reify ]
+94 verbose reify failed optional dependency /Users/rongweihu/model_monitoring_tool/frontend/node_modules/@esbuild/android-x64
+95 silly reify mark deleted [
+95 silly reify   '/Users/rongweihu/model_monitoring_tool/frontend/node_modules/@esbuild/android-x64'
+95 silly reify ]
+96 verbose reify failed optional dependency /Users/rongweihu/model_monitoring_tool/frontend/node_modules/@esbuild/android-arm64
+97 silly reify mark deleted [
+97 silly reify   '/Users/rongweihu/model_monitoring_tool/frontend/node_modules/@esbuild/android-arm64'
+97 silly reify ]
+98 verbose reify failed optional dependency /Users/rongweihu/model_monitoring_tool/frontend/node_modules/@esbuild/android-arm
+99 silly reify mark deleted [
+99 silly reify   '/Users/rongweihu/model_monitoring_tool/frontend/node_modules/@esbuild/android-arm'
+99 silly reify ]
+100 verbose reify failed optional dependency /Users/rongweihu/model_monitoring_tool/frontend/node_modules/@esbuild/aix-ppc64
+101 silly reify mark deleted [
+101 silly reify   '/Users/rongweihu/model_monitoring_tool/frontend/node_modules/@esbuild/aix-ppc64'
+101 silly reify ]
+102 http fetch POST 200 https://registry.npmjs.org/-/npm/v1/security/advisories/bulk 126ms
+103 silly audit report {}
+104 silly ADD
+105 silly ADD
+106 silly ADD
+107 silly ADD
+108 silly ADD
+109 silly ADD
+110 silly ADD
+111 silly ADD
+112 silly ADD
+113 silly ADD
+114 silly ADD
+115 silly ADD
+116 silly ADD
+117 silly ADD
+118 silly ADD
+119 silly ADD
+120 silly ADD
+121 silly ADD
+122 silly ADD
+123 silly ADD
+124 silly ADD
+125 silly ADD
+126 silly ADD
+127 silly ADD
+128 silly ADD
+129 silly ADD
+130 silly ADD
+131 silly ADD
+132 silly ADD
+133 silly ADD
+134 silly ADD
+135 silly ADD
+136 silly ADD
+137 silly ADD
+138 silly ADD
+139 silly ADD
+140 silly ADD
+141 silly ADD
+142 silly ADD
+143 silly ADD
+144 verbose cwd /Users/rongweihu/model_monitoring_tool/frontend
+145 verbose os Darwin 24.2.0
+146 verbose node v22.13.1
+147 verbose npm  v10.9.2
+148 verbose exit 0
+149 info ok
