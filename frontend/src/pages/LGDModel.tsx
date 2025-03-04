@@ -180,7 +180,11 @@ const LGDModel: React.FC = () => {
         quarter: quarter || undefined,
         portfolio: portfolio || undefined,
         modelName: modelNameToSend || undefined,
-      });
+      }) as LGDAnalysisResults;
+
+      if (!response) {
+        throw new Error('No response data received');
+      }
 
       setResults(response);
       setComparisonData(response.plot_data.actual_lgd.map((actual, i) => ({

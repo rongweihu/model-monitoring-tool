@@ -168,7 +168,11 @@ const EADModel: React.FC = () => {
         quarter: quarter || undefined,
         portfolio: portfolio || undefined,
         modelName: modelNameToSend || undefined,
-      });
+      }) as EADAnalysisResults;
+
+      if (!response) {
+        throw new Error('No response data received');
+      }
 
       setResults(response);
       setComparisonData(response.plot_data.actual_ead.map((actual, i) => ({
@@ -180,7 +184,7 @@ const EADModel: React.FC = () => {
 
       const modelNamesFromData = [...new Set(response.additional_data.map((item: any) => item.ModelName))].sort();
       setModelNames(modelNamesFromData);
-      if (!selectedModelName && modelNamesFromData.length > 0) setSelectedModelName('');
+      if (!selectedModelName && modelNamesFromData.length > 0) setSelectedModelName(modelNamesFromData[0]);
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : 'Unknown error';
       const errorDetails = err instanceof Error && err.stack ? err.stack : JSON.stringify(err);

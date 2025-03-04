@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import {
   Paper, Typography, Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
   Grid, Chip, CircularProgress, FormControl, InputLabel, Select, MenuItem, Checkbox, ListItemText,
-  Tabs, Tab, Tooltip as MUITooltip,
+  Tabs, Tab, Tooltip as MUITooltip, SelectChangeEvent
 } from '@mui/material';
 import SummarizeIcon from '@mui/icons-material/Summarize';
 import AssessmentIcon from '@mui/icons-material/Assessment';
@@ -84,7 +84,6 @@ const DEFAULT_THRESHOLDS: MacroModelThresholds = {
 };
 
 const CHART_COLORS = ['#8884d8', '#82ca9d', '#ffc658'];
-const CHART_SHAPES = ['circle', 'square', 'diamond'];
 
 // === Utility Functions ===
 const safeToFixed = (value: number | undefined | null, decimals: number = 4): string =>
@@ -458,7 +457,7 @@ const HeteroscedasticityTestSection: React.FC<{ results: MacroModelResults; them
                   />
                   <RechartsTooltip 
                     cursor={{ strokeDasharray: '3 3' }}
-                    formatter={(value: number, name: string, entry: any) => {
+                    formatter={(value: number, name: string) => {
                       // Use entry.payload to access x and y directly
                       if (name === 'x') return [value.toFixed(4), 'Predicted PD'];
                       if (name === 'y') return [value.toFixed(4), 'Model Error'];
@@ -604,7 +603,10 @@ const SummaryTab: React.FC<{ results: MacroModelResults; thresholds: MacroModelT
   const autocorrelationInterpretation = results.autocorrelation_results.model_error.Interpretation;
 
   const stationarityResults = Object.entries(results.stationarity_results).reduce((acc, [variable, stats]) => {
-    const nonStationaryCount = ['ADF p-value', 'KPSS p-value', 'ZA p-value', 'PP p-value'].filter(key => stats[key as keyof StationarityResult] >= thresholds.stationarity_threshold).length;
+    const nonStationaryCount = ['ADF p-value', 'KPSS p-value', 'ZA p-value', 'PP p-value'].filter(key => {
+      const value = stats[key as keyof StationarityResult];
+      return typeof value === 'number' && value >= thresholds.stationarity_threshold;
+    }).length;
     acc[variable] = { status: nonStationaryCount >= 2 ? 'Fail' : 'Pass', interpretation: nonStationaryCount >= 2 ? 'Non-stationary' : 'Stationary' };
     return acc;
   }, {} as Record<string, { status: string; interpretation: string }>);
@@ -703,7 +705,7 @@ const SummaryTab: React.FC<{ results: MacroModelResults; thresholds: MacroModelT
 
 const StationarityTab: React.FC<{ results: MacroModelResults; thresholds: MacroModelThresholds; selectedSeries: string[]; setSelectedSeries: (series: string[]) => void; seriesOptions: string[] }> = ({ results, thresholds, selectedSeries, setSelectedSeries, seriesOptions }) => {
   const theme = useTheme();
-  const handleChange = (event: React.ChangeEvent<{ value: unknown }>) => {
+  const handleChange = (event: SelectChangeEvent<string[]>) => {
     const value = event.target.value as string[];
     setSelectedSeries(value.includes('clear-all') ? [] : value.filter(s => s !== 'snapshot_ccyymm'));
   };
@@ -732,11 +734,11 @@ const StationarityTab: React.FC<{ results: MacroModelResults; thresholds: MacroM
                   ].map(({ name, stat, p }) => (
                     <TableRow key={name}>
                       <TableCell><strong>{name} Test</strong></TableCell>
-                      <TableCell>{safeToFixed(stats[stat as keyof StationarityResult])}</TableCell>
-                      <TableCell>{safeToFixed(stats[p as keyof StationarityResult])}</TableCell>
+                      <TableCell>{safeToFixed(Number(stats[stat as keyof StationarityResult]))}</TableCell>
+                      <TableCell>{safeToFixed(Number(stats[p as keyof StationarityResult]))}</TableCell>
                       <TableCell>
-                        <Chip label={stats[p as keyof StationarityResult] < thresholds.stationarity_threshold ? 'Stationary' : 'Non-Stationary'}
-                          color={stats[p as keyof StationarityResult] < thresholds.stationarity_threshold ? 'success' : 'error'} variant="outlined" />
+                        <Chip label={Number(stats[p as keyof StationarityResult]) < thresholds.stationarity_threshold ? 'Stationary' : 'Non-Stationary'}
+                          color={Number(stats[p as keyof StationarityResult]) < thresholds.stationarity_threshold ? 'success' : 'error'} variant="outlined" />
                       </TableCell>
                     </TableRow>
                   ))}
@@ -788,7 +790,7 @@ const StationarityTab: React.FC<{ results: MacroModelResults; thresholds: MacroM
                 }} labelStyle={{ color: theme.palette.text.primary, fontWeight: 'bold' }} itemStyle={{ color: theme.palette.text.secondary }} />
                 <Legend verticalAlign="bottom" height={36} layout="horizontal" align="center" wrapperStyle={{ bottom: -20, left: 0, right: 0 }} />
                 {selectedSeries.map((series, index) => (
-                  <Line key={series} type="monotone" dataKey={series} yAxisId={index === 0 ? 'left' : 'right'} stroke={CHART_COLORS[index % CHART_COLORS.length]} dot={{ strokeWidth: 2, r: 5, shape: CHART_SHAPES[index % CHART_SHAPES.length] }} />
+                  <Line key={series} type="monotone" dataKey={series} yAxisId={index === 0 ? 'left' : 'right'} stroke={CHART_COLORS[index % CHART_COLORS.length]} dot={{ strokeWidth: 2, r: 5 }} />
                 ))}
               </LineChart>
             </ResponsiveContainer>
@@ -830,9 +832,9 @@ const MacroModel: React.FC = () => {
     const loadData = async () => {
       setIsLoading(true);
       try {
-        const response = await api.analyzeMacroModel();
+        const response = await api.analyzeMacroModel() as MacroModelResults;
         setResults(response);
-        const seriesNames = Object.keys(response.time_series_data[0]).filter(key => key !== 'snapshot_ccyymm');
+        const seriesNames = Object.keys(response.time_series_data[0] || {}).filter(key => key !== 'snapshot_ccyymm');
         setSeriesOptions(seriesNames);
         setSelectedSeries([seriesNames[0]]);
       } catch (err) {
@@ -849,7 +851,7 @@ const MacroModel: React.FC = () => {
         <Typography variant="h5" gutterBottom sx={{ mb: 2, pb: 1, borderBottom: '1px solid rgba(0, 0, 0, 0.12)' }}>
           Macro Model Analysis Results
         </Typography>
-        <Tabs value={activeTab} onChange={(e, val) => setActiveTab(val)} variant="fullWidth" sx={{ borderBottom: 1, borderColor: 'divider', mb: 2 }}>
+        <Tabs value={activeTab} onChange={(_, val) => setActiveTab(val)} variant="fullWidth" sx={{ borderBottom: 1, borderColor: 'divider', mb: 2 }}>
           <Tab value="summary" label="Summary" icon={<SummarizeIcon />} iconPosition="start" />
           <Tab value="model_performance" label="Model Performance" icon={<AssessmentIcon />} iconPosition="start" />
           <Tab value="stationarity" label="Stationarity Tests" icon={<TimelineIcon />} iconPosition="start" />

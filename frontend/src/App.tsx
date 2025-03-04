@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Route, Routes, Link as RouterLink } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import { Box, CssBaseline, ThemeProvider, createTheme } from '@mui/material';
 import { useState, useMemo } from 'react';
 
@@ -15,7 +15,8 @@ import DatabaseManager from './pages/DatabaseManager';
 import Layout from './components/Layout'; // Correct path to Layout component
 
 function App() {
-  const [isDarkMode, setIsDarkMode] = useState(() => {
+  // We only need isDarkMode state as the toggle functionality is handled in Layout component
+  const [isDarkMode] = useState(() => {
     const savedTheme = localStorage.getItem('appTheme');
     return savedTheme === 'dark';
   });
@@ -36,11 +37,7 @@ function App() {
     [isDarkMode]
   );
 
-  const toggleTheme = () => {
-    const newTheme = !isDarkMode;
-    setIsDarkMode(newTheme);
-    localStorage.setItem('appTheme', newTheme ? 'dark' : 'light');
-  };
+  // Theme is managed by Layout component
 
   return (
     <ThemeProvider theme={theme}>

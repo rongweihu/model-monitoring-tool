@@ -12,24 +12,14 @@ import {
   ListItemText, 
   Link, 
   Divider, 
-  Button,
   IconButton
 } from '@mui/material';
 import { 
   Info, 
   Upload, 
   Person, 
-  Assessment, 
   FolderOpen, 
   Menu, 
-  Dashboard, 
-  Info as InfoIcon, 
-  Upload as UploadIcon, 
-  Tune, 
-  Assessment as AssessmentIcon, 
-  Timeline, 
-  TrendingUp, 
-  AccountBalance,
   CreditScore,  
   MonetizationOn,  
   CompareArrows,  
@@ -37,7 +27,7 @@ import {
   LightMode,
   DarkMode
 } from '@mui/icons-material';
-import { useNavigate, useLocation, Link as RouterLink } from 'react-router-dom';
+import { Link as RouterLink } from 'react-router-dom';
 import { createTheme } from '@mui/material/styles';
 
 // Import logos for different themes
@@ -61,8 +51,6 @@ interface LayoutProps {
 }
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
-  const navigate = useNavigate();
-  const location = useLocation();
   const [isMenuVisible, setIsMenuVisible] = useState(true);
   const [isDarkMode, setIsDarkMode] = useState(() => {
     // Check local storage for theme preference on initial load

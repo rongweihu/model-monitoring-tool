@@ -5,12 +5,12 @@ import { api } from '../utils/api';
 
 // === Utility Components ===
 const UploadSection: React.FC<{
-  type: 'macro' | 'pd' | 'lgd' | 'ead' | 'pd_baseline';
   title: string;
   file: File | undefined;
   onFileChange: (file: File) => void;
   onUpload: () => void;
-}> = ({ type, title, file, onFileChange, onUpload }) => (
+  type?: string; // Add type back as an optional prop
+}> = ({ title, file, onFileChange, onUpload }) => (
   <Box sx={{ mb: 4 }}>
     <Typography variant="h6" gutterBottom>{title}</Typography>
     <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>

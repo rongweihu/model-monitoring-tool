@@ -64,7 +64,7 @@ const SectionHeader: React.FC<{ title: string }> = ({ title }) => (
   </Typography>
 );
 
-const InfoItem: React.FC<{ primary: string; secondary: string }> = ({ primary, secondary }) => (
+const InfoItem: React.FC<{ primary: string; secondary: React.ReactNode }> = ({ primary, secondary }) => (
   <ListItem>
     <ListItemText
       primary={primary}
@@ -167,7 +167,7 @@ const Introduction: React.FC = () => {
         indicatorColor="primary"
         textColor="primary"
       >
-        {tabConfig.map(({ label, icon }, index) => (
+        {tabConfig.map(({ label, icon }) => (
           <Tab
             key={label}
             label={label}
@@ -290,7 +290,7 @@ const Introduction: React.FC = () => {
               />
               <InfoItem
                 primary="Stationarity Test for Macro Variables"
-                secondary={[
+                secondary={<div>{[
                   "Several tests are commonly employed:",
                   "• <strong>Augmented Dickey-Fuller (ADF) Test</strong>: The ADF test is a widely used statistical test that checks for the presence of a unit root in a univariate time series. A unit root indicates non-stationarity. The null hypothesis of the ADF test is that the series has a unit root, while the alternative hypothesis suggests stationarity.",
                   "• <strong>Kwiatkowski-Phillips-Schmidt-Shin (KPSS) Test</strong>: In contrast to the ADF test, the KPSS test has a null hypothesis of stationarity. It tests whether a time series is stationary around a deterministic trend. If the KPSS test statistic exceeds a critical value, we reject the null hypothesis and conclude that the series is non-stationary.",
@@ -298,7 +298,7 @@ const Introduction: React.FC = () => {
                   "• <strong>Phillips-Perron (PP) Test</strong>: Similar to the ADF test, the Phillips-Perron test checks for a unit root in a time series. However, it adjusts for serial correlation and heteroskedasticity in the error terms, providing a more robust alternative to the ADF test.",
                 ].map((item, index) => (
                   <div key={index} dangerouslySetInnerHTML={{ __html: item }} />
-                ))}
+                ))}</div>}
               />
             </List>
           </Grid>

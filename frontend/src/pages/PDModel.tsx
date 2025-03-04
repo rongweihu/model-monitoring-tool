@@ -354,10 +354,10 @@ const PDModel: React.FC = () => {
     variables: [string, any][];
     selected: string[];
     setSelected: React.Dispatch<React.SetStateAction<string[]>>;
-    type: 'Numeric' | 'Categorical';
+    filterType: 'Numeric' | 'Categorical';
     anchorEl: null | HTMLElement;
     setAnchorEl: React.Dispatch<React.SetStateAction<null | HTMLElement>>;
-  }> = ({ variables, selected, setSelected, type, anchorEl, setAnchorEl }) => {
+  }> = ({ variables, selected, setSelected, anchorEl, setAnchorEl }) => {
     const allVariables = variables.map(([v]) => v);
     const open = Boolean(anchorEl);
 
@@ -439,7 +439,7 @@ const PDModel: React.FC = () => {
           <RechartsTooltip 
             contentStyle={{ backgroundColor: isDarkMode ? theme.palette.background.paper : 'white', color: isDarkMode ? theme.palette.text.primary : 'black' }}
             // Format tooltip values to show at most 2 decimal places for x-axis
-            formatter={(value, name, props) => [value, name]}
+            formatter={(value, name) => [value, name]}
             labelFormatter={(label) => typeof label === 'number' ? label.toFixed(2) : label}
           />
           <Line type="monotone" dataKey="y" stroke="#8884d8" strokeWidth={2} dot={{ r: 5 }} activeDot={{ r: 8 }} />
@@ -561,7 +561,7 @@ const PDModel: React.FC = () => {
           <Grid item xs={12}>
             <Paper sx={{ p: 2 }}>
               <Typography variant="h6">Numeric Variables</Typography>
-              <VariableFilterDropdown variables={numericVars} selected={numericFilter} setSelected={setNumericFilter} type="Numeric" anchorEl={numericMenuAnchor} setAnchorEl={setNumericMenuAnchor} />
+              <VariableFilterDropdown variables={numericVars} selected={numericFilter} setSelected={setNumericFilter} filterType="Numeric" anchorEl={numericMenuAnchor} setAnchorEl={setNumericMenuAnchor} />
               <TableContainer>
                 <Table size="small">
                   <TableHead>
@@ -582,7 +582,7 @@ const PDModel: React.FC = () => {
           <Grid item xs={12}>
             <Paper sx={{ p: 2 }}>
               <Typography variant="h6">Categorical Variables</Typography>
-              <VariableFilterDropdown variables={categoricalVars} selected={categoricalFilter} setSelected={setCategoricalFilter} type="Categorical" anchorEl={categoricalMenuAnchor} setAnchorEl={setCategoricalMenuAnchor} />
+              <VariableFilterDropdown variables={categoricalVars} selected={categoricalFilter} setSelected={setCategoricalFilter} filterType="Categorical" anchorEl={categoricalMenuAnchor} setAnchorEl={setCategoricalMenuAnchor} />
               <TableContainer>
                 <Table size="small">
                   <TableHead>

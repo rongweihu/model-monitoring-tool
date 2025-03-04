@@ -18,13 +18,8 @@ import {
   DialogTitle,
   TextField,
   Chip,
-  Grid,
-  Card,
-  CardContent,
-  CardActions,
   Tabs,
   Tab,
-  Divider,
   CircularProgress,
   Tooltip,
   Alert,
@@ -36,8 +31,7 @@ import {
   Edit as EditIcon,
   Download as DownloadIcon,
   Visibility as ViewIcon,
-  Refresh as RefreshIcon,
-  Add as AddIcon
+  Refresh as RefreshIcon
 } from '@mui/icons-material';
 import { format } from 'date-fns';
 import api from '../utils/api';
@@ -110,11 +104,11 @@ const DatabaseManager: React.FC = () => {
     setError(null);
     try {
       // Fetch datasets
-      const datasetsData = await api.getAllDatasets();
+      const datasetsData = await api.getAllDatasets() as { datasets: Dataset[] };
       setDatasets(datasetsData.datasets || []);
 
       // Fetch analysis results
-      const resultsData = await api.getAllAnalysisResults();
+      const resultsData = await api.getAllAnalysisResults() as { analysis_results: AnalysisResult[] };
       setAnalysisResults(resultsData.analysis_results || []);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An unknown error occurred');
@@ -127,7 +121,7 @@ const DatabaseManager: React.FC = () => {
     fetchData();
   }, []);
 
-  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+  const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
   };
 
@@ -173,13 +167,21 @@ const DatabaseManager: React.FC = () => {
         
         if (contentType.includes('text/html')) {
           console.error('Received HTML instead of binary data:', responseText);
-          message.error('Failed to download dataset: Received HTML response instead of file');
+          setSnackbarMessage('Failed to download dataset: Received HTML response instead of file');
+          setSnackbarSeverity('error');
+          setSnackbarOpen(true);
+        setSnackbarSeverity('error');
+        setSnackbarOpen(true);
         } else if (contentType.includes('application/json')) {
           const errorData = JSON.parse(responseText);
           console.error('Backend error:', errorData);
-          message.error(`Failed to download dataset: ${errorData.error || 'Unknown error'}`);
+          setSnackbarMessage(`Failed to download dataset: ${errorData.error || 'Unknown error'}`);
+          setSnackbarSeverity('error');
+          setSnackbarOpen(true);
         } else {
-          message.error('Failed to download dataset: Unknown error');
+          setSnackbarMessage('Failed to download dataset: Unknown error');
+          setSnackbarSeverity('error');
+          setSnackbarOpen(true);
         }
         return;
       }
@@ -188,7 +190,9 @@ const DatabaseManager: React.FC = () => {
       if (contentType.includes('text/html')) {
         const htmlContent = await response.text();
         console.error('Received HTML response:', htmlContent);
-        message.error('Failed to download dataset: Received HTML response instead of file');
+        setSnackbarMessage('Failed to download dataset: Received HTML response instead of file');
+        setSnackbarSeverity('error');
+        setSnackbarOpen(true);
         return;
       }
 
@@ -219,7 +223,9 @@ const DatabaseManager: React.FC = () => {
 
       if (blob.size === 0) {
         console.error('Received empty Blob');
-        message.error('Downloaded file is empty');
+        setSnackbarMessage('Downloaded file is empty');
+        setSnackbarSeverity('error');
+        setSnackbarOpen(true);
         return;
       }
 
@@ -232,10 +238,14 @@ const DatabaseManager: React.FC = () => {
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
 
-      message.success(`Dataset ${downloadFileName} downloaded successfully`);
+      setSnackbarMessage(`Dataset ${downloadFileName} downloaded successfully`);
+      setSnackbarSeverity('success');
+      setSnackbarOpen(true);
     } catch (error) {
       console.error('Error downloading dataset:', error);
-      message.error('Failed to download dataset');
+      setSnackbarMessage('Failed to download dataset');
+      setSnackbarSeverity('error');
+      setSnackbarOpen(true);
     }
   };
 
@@ -305,7 +315,7 @@ const DatabaseManager: React.FC = () => {
     }
   };
 
-  const handleSnackbarClose = (event?: React.SyntheticEvent | Event, reason?: string) => {
+  const handleSnackbarClose = (_event?: React.SyntheticEvent | Event, reason?: string) => {
     if (reason === 'clickaway') {
       return;
     }
