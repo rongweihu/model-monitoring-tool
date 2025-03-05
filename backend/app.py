@@ -298,67 +298,6 @@ class ModelMonitor:
             iv_total += iv_bin
 
             if categorical:
-                bin_range = feature_values[bin_mask][0]
-                bin_label = bin_range
-            else:
-                bin_label = f'Bin {bin_num}'
-                bin_min = bin_edges[bin_num]
-                bin_max = bin_edges[bin_num + 1]
-                bin_range = f'[{bin_min:.2f}, {bin_max:.2f}]'
-
-            bin_details['bins'].append({'bin_number': bin_num, 'bin_range': bin_range, 'good_count': float(good_count), 'bad_count': float(bad_count), 'woe': float(woe), 'iv_bin': float(iv_bin)})
-            bin_details['good_distribution'].append(float(good_dist))
-            bin_details['bad_distribution'].append(float(bad_dist))
-            bin_details['woe'].append(float(woe))
-            bin_details['iv_per_bin'].append(float(iv_bin))
-            bin_details['bin_range'].append(bin_range)
-
-            bin_mean = np.mean(feature_values[bin_mask]) if not categorical and len(feature_values[bin_mask]) > 0 else None
-            bin_stats.append({'bin_number': bin_num, 'bin_mean': round(bin_mean, 4) if bin_mean else None, 'bin_label': bin_label, 'total_count': float(good_count + bad_count), 'default_count': float(bad_count), 'non_default_count': float(good_count), 'woe': float(woe)})
-
-        woe_plot_data = [{'x': bin_details['bins'][i]['bin_range'] if categorical else np.mean(feature_values[binned_feature == i]) if len(feature_values[binned_feature == i]) > 0 else bin_edges[i], 'y': round(bin_details['woe'][i], 4), 'label': str(bin_details['bins'][i]['bin_range'] if categorical else np.mean(feature_values[binned_feature == i]) if len(feature_values[binned_feature == i]) > 0 else bin_edges[i])} for i in range(len(bin_details['bins']))]
-
-        return {
-            'iv_total': float(abs(iv_total)),
-            'iv_by_bin': bin_details['iv_per_bin'],
-            'details': {'bins': bin_stats, 'woe': bin_details['woe'], 'bin_details': bin_details},
-            'woe_plot_data': woe_plot_data,
-            'is_categorical': categorical,
-            'unique_values': feature_values if categorical else None
-        }
-    def calculate_information_value(self, feature_values: np.ndarray, target_values: np.ndarray, bins: int = 10, categorical: bool = False) -> Dict[str, Any]:
-        """Calculate Information Value (IV) for a feature."""
-        if len(feature_values) != len(target_values):
-            raise ValueError("Feature values and target values must have the same length")
-
-        if categorical:
-            unique_values = np.unique(feature_values)
-            binned_feature = pd.Series(feature_values).astype('category').cat.codes
-        else:
-            if not np.issubdtype(feature_values.dtype, np.number):
-                raise ValueError("Feature values must be numeric for binning")
-            target_values = np.asarray(target_values, dtype=float).flatten()
-            feature_values = np.asarray(feature_values, dtype=float).flatten()
-            binned_feature, bin_edges = pd.qcut(feature_values, q=bins, retbins=True, duplicates='drop')
-            binned_feature = binned_feature.codes
-
-        total_good = np.sum(1 - target_values)
-        total_bad = np.sum(target_values)
-        bin_details = {'bins': [], 'good_distribution': [], 'bad_distribution': [], 'woe': [], 'iv_per_bin': [], 'bin_range': []}
-        iv_total = 0
-        bin_stats = []
-
-        for bin_num in range(np.min(binned_feature), np.max(binned_feature) + 1):
-            bin_mask = (binned_feature == bin_num)
-            good_count = np.sum((1 - target_values)[bin_mask]) + 1e-6
-            bad_count = np.sum(target_values[bin_mask]) + 1e-6
-            good_dist = good_count / total_good
-            bad_dist = bad_count / total_bad
-            woe = np.log(bad_dist / good_dist) if good_dist > 0 and bad_dist > 0 else 0
-            iv_bin = (bad_dist - good_dist) * woe
-            iv_total += iv_bin
-
-            if categorical:
                 bin_range = feature_values[bin_mask][0] if len(feature_values[bin_mask]) > 0 else 'N/A'
                 bin_label = bin_range
             else:
@@ -445,26 +384,9 @@ class ModelMonitor:
         return metrics
 
     @staticmethod
-    def macro_model_analysis(macro_data: pd.DataFrame) -> Dict[str, Any]:
-        """Perform enhanced macro model analysis."""
-        results = {'stationarity_tests': {}, 'correlation_matrix': {}, 'trend_analysis': {}}
-        for column in macro_data.select_dtypes(include=[np.number]).columns:
-            results['stationarity_tests'][column] = ModelMonitor.test_stationarity(macro_data[column])
-        results['correlation_matrix'] = macro_data.corr().to_dict()
-        results['trend_analysis'] = {column: {'mean': macro_data[column].mean(), 'std': macro_data[column].std(), 'min': macro_data[column].min(), 'max': macro_data[column].max(), 'trend_slope': np.polyfit(range(len(macro_data)), macro_data[column], 1)[0]} for column in macro_data.select_dtypes(include=[np.number]).columns}
-        return results
-
-    @staticmethod
     def calculate_rmse(actual: np.ndarray, predicted: np.ndarray) -> float:
         """Calculate Root Mean Square Error."""
         return float(np.sqrt(mean_squared_error(actual, predicted)))
-
-    @staticmethod
-    def calculate_adjusted_r2(actual: np.ndarray, predicted: np.ndarray, n_predictors: int) -> float:
-        """Calculate Adjusted R-squared."""
-        r2 = r2_score(actual, predicted)
-        n = len(actual)
-        return float(1 - (1 - r2) * (n - 1) / (n - n_predictors - 1))
 
     @staticmethod
     def calculate_mape(actual: np.ndarray, predicted: np.ndarray) -> float:
@@ -480,16 +402,6 @@ class ModelMonitor:
         crosstab = pd.crosstab(df['actual_decile'], df['predicted_decile'], normalize='all') * 100
         decile_data = [{'actual_decile': f'D{i+1}', 'values': [round(crosstab.iloc[i, j], 2) for j in range(10)]} for i in range(10)]
         return {'data': decile_data, 'total_count': len(df)}
-
-    @staticmethod
-    def calculate_recovery_rate(exposure: np.ndarray, recovery: np.ndarray) -> np.ndarray:
-        """Calculate Recovery Rate."""
-        return np.where(exposure > 0, recovery / exposure, np.nan)
-
-    @staticmethod
-    def calculate_lgd(exposure: np.ndarray, recovery: np.ndarray) -> np.ndarray:
-        """Calculate Loss Given Default."""
-        return np.where(exposure > 0, 1 - (recovery / exposure), np.nan)
 
     def perform_hosmer_lemeshow_test(self, actual_values: np.ndarray, predicted_probs: np.ndarray, n_bins: int = 10) -> Dict[str, Any]:
         """Perform Hosmer-Lemeshow test for calibration."""
@@ -669,11 +581,6 @@ class ModelMonitor:
             csi_results[cat_col] = {'csi_total': float(np.sum(csi_values)), 'bin_details': bin_details}
 
         return csi_results
-
-    def analyze_ead(self, df: pd.DataFrame) -> Dict[str, Any]:
-        """Analyze EAD data and return results."""
-        df['EAD'] = pd.to_numeric(df['EAD'], errors='coerce').fillna(0)
-        return {}  # Placeholder for actual EAD analysis logic
 
 # === API Endpoints ===
 # --- PD Model Endpoints ---
