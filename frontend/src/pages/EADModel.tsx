@@ -7,6 +7,7 @@ import {
   ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, ReferenceLine,
 } from 'recharts';
 import { useTheme } from '@mui/material/styles';
+import { debounce } from 'lodash';
 import { api } from '../utils/api';
 
 // === Interfaces ===
@@ -119,6 +120,7 @@ const EADModel: React.FC = () => {
   const [error, setError] = useState<{ message: string; details?: string } | null>(null);
   const [performanceMetrics, setPerformanceMetrics] = useState<PerformanceMetric[]>([]);
   const [results, setResults] = useState<EADAnalysisResults | null>(null);
+  const [isInitialFetch, setIsInitialFetch] = useState(true);
   const [thresholds, setThresholds] = useState<Thresholds>(() => {
     const stored = localStorage.getItem('eadThresholds');
     const defaults = { MAPE: 15.0, 'R-squared': 0.8 };
@@ -159,15 +161,16 @@ const EADModel: React.FC = () => {
     };
   }, [results]);
 
-  // Data Fetching
-  const fetchEADAnalysis = async (quarter?: string, portfolio?: string, modelName?: string) => {
+  // Data Fetching with Debouncing
+  const fetchEADAnalysis = debounce(async (quarter?: string, portfolio?: string, modelName?: string) => {
+    const requestId = `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
     try {
-      console.log('Fetching EAD analysis with:', { quarter, portfolio, modelName, modelNames }); // Debug log
-      const modelNameToSend = modelName || modelNames.join(','); // Line 186-ish, uses modelNames
+      console.log('Fetching EAD analysis with:', { quarter, portfolio, modelName, requestId });
       const response = await api.analyzeEAD({
         quarter: quarter || undefined,
         portfolio: portfolio || undefined,
-        modelName: modelNameToSend || undefined,
+        modelName: modelName || undefined,
+        request_id: requestId,
       }) as EADAnalysisResults;
 
       if (!response) {
@@ -184,7 +187,9 @@ const EADModel: React.FC = () => {
 
       const modelNamesFromData = [...new Set(response.additional_data.map((item: any) => item.ModelName))].sort();
       setModelNames(modelNamesFromData);
-      if (!selectedModelName && modelNamesFromData.length > 0) setSelectedModelName(modelNamesFromData[0]);
+      if (!selectedModelName && modelNamesFromData.length > 0 && isInitialFetch) {
+        setSelectedModelName(modelNamesFromData[0]); // Set without immediate re-fetch
+      }
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : 'Unknown error';
       const errorDetails = err instanceof Error && err.stack ? err.stack : JSON.stringify(err);
@@ -199,8 +204,10 @@ const EADModel: React.FC = () => {
         message: 'Error Loading EAD Analysis',
         details: err instanceof Error && err.message.includes('Network Error') ? 'Network Error' : errorMsg,
       });
+    } finally {
+      if (isInitialFetch) setIsInitialFetch(false);
     }
-  };
+  }, 300); // 300ms debounce delay
 
   const calculatePerformanceMetrics = (data: EADAnalysisResults) => {
     const metrics = [
@@ -212,6 +219,7 @@ const EADModel: React.FC = () => {
 
   useEffect(() => {
     fetchEADAnalysis(selectedQuarter, selectedPortfolio, selectedModelName);
+    return () => fetchEADAnalysis.cancel(); // Cleanup debounce on unmount
   }, [selectedQuarter, selectedPortfolio, selectedModelName]);
 
   // Handlers
@@ -219,7 +227,7 @@ const EADModel: React.FC = () => {
 
   // Render
   if (error) return (
-    <Paper elevation={3} sx={{ p: 2, bboxShadow: 3, borderRadius: 4  }}>
+    <Paper elevation={3} sx={{ p: 2, bboxShadow: 3, borderRadius: 4 }}>
       <Typography color="error" variant="h6">{error.message}</Typography>
       {error.details && <Typography variant="body1" sx={{ mt: 1, color: 'black' }}>{error.details}</Typography>}
       <Typography variant="body2" sx={{ mt: 1 }}>Check the browser console for more details.</Typography>
@@ -227,66 +235,65 @@ const EADModel: React.FC = () => {
   );
 
   return (
-      <Paper elevation={3} sx={{ p: 2, bboxShadow: 3, borderRadius: 4  }}>
-        <Typography variant="h6" gutterBottom>EAD Model Analysis</Typography>
-        <Grid container spacing={2}>
-          <Grid item xs={12} sm={4}>
-            <FormControl fullWidth variant="outlined" size="small">
-              <InputLabel>Quarter</InputLabel>
-              <Select value={selectedQuarter} label="Quarter" onChange={handleChange(setSelectedQuarter)}>
-                <MenuItem value="">All Quarters</MenuItem>
-                <MenuItem value="2024Q1">2024 Q1</MenuItem>
-                <MenuItem value="2023Q4">2023 Q4</MenuItem>
-              </Select>
-            </FormControl>
-          </Grid>
-          <Grid item xs={12} sm={4}>
-            <FormControl fullWidth variant="outlined" size="small">
-              <InputLabel>Portfolio</InputLabel>
-              <Select value={selectedPortfolio} label="Portfolio" onChange={handleChange(setSelectedPortfolio)}>
-                <MenuItem value="">All Portfolios</MenuItem>
-                <MenuItem value="retail">Retail</MenuItem>
-                <MenuItem value="corporate">Corporate</MenuItem>
-              </Select>
-            </FormControl>
-          </Grid>
-          <Grid item xs={12} sm={4}>
-            <FormControl fullWidth variant="outlined" size="small">
-              <InputLabel>Model Name</InputLabel>
-              <Select value={selectedModelName} label="Model Name" onChange={handleChange(setSelectedModelName)}>
-                <MenuItem value="">All Models</MenuItem>
-                {modelNames.map(m => <MenuItem key={m} value={m}>{m}</MenuItem>)}
-              </Select>
-            </FormControl>
-          </Grid>
+    <Paper elevation={3} sx={{ p: 2, bboxShadow: 3, borderRadius: 4 }}>
+      <Typography variant="h6" gutterBottom>EAD Model Analysis</Typography>
+      <Grid container spacing={2}>
+        <Grid item xs={12} sm={4}>
+          <FormControl fullWidth variant="outlined" size="small">
+            <InputLabel>Quarter</InputLabel>
+            <Select value={selectedQuarter} label="Quarter" onChange={handleChange(setSelectedQuarter)}>
+              <MenuItem value="">All Quarters</MenuItem>
+              <MenuItem value="2024Q1">2024 Q1</MenuItem>
+              <MenuItem value="2023Q4">2023 Q4</MenuItem>
+            </Select>
+          </FormControl>
         </Grid>
-        {results && (
-          <Box sx={{ flex: 1, overflow: 'auto', width: '100%', mt: 2 }}>
-            <Grid container spacing={2} sx={{ mb: 2 }}>
-              {performanceMetrics.map((metric, i) => <MetricBox key={i} metric={metric} />)}
-            </Grid>
-            <Box sx={{ width: '100%', height: '50vh', minHeight: 400, mb: 2, px: 0 }}>
-              <ResponsiveContainer width="100%" height="100%">
-                <ScatterChart margin={{ top: 20, right: 40, bottom: 40, left: 60 }}>
-                  <CartesianGrid />
-                  <XAxis type="number" dataKey="actual" name="Actual EAD" tickFormatter={value => value.toFixed(0)} label={{ value: 'Actual EAD', position: 'bottom', offset: 20 }} />
-                  <YAxis type="number" dataKey="predicted" name="Predicted EAD" tickFormatter={value => value.toFixed(0)} label={{ value: 'Predicted EAD', angle: -90, position: 'insideLeft', offset: -30, style: { textAnchor: 'middle' } }} />
-                  <RechartsTooltip contentStyle={{ backgroundColor: isDarkMode ? theme.palette.background.paper : 'white', color: isDarkMode ? theme.palette.text.primary : 'black' }} />
-                  <Scatter name="EAD Comparison" data={comparisonData} fill="#8884d8" />
-                  <ReferenceLine x={0} y={0} stroke="red" strokeDasharray="3 3" />
-                </ScatterChart>
-              </ResponsiveContainer>
-            </Box>
-            {results.decile_data && (
-              <Box sx={{ mt: 4 }}>
-                <Typography variant="h6" gutterBottom>Decile Analysis</Typography>
-                <DecileTable data={results.decile_data.data} totalCount={results.decile_data.total_count} isDarkMode={isDarkMode} />
-              </Box>
-            )}
+        <Grid item xs={12} sm={4}>
+          <FormControl fullWidth variant="outlined" size="small">
+            <InputLabel>Portfolio</InputLabel>
+            <Select value={selectedPortfolio} label="Portfolio" onChange={handleChange(setSelectedPortfolio)}>
+              <MenuItem value="">All Portfolios</MenuItem>
+              <MenuItem value="retail">Retail</MenuItem>
+              <MenuItem value="corporate">Corporate</MenuItem>
+            </Select>
+          </FormControl>
+        </Grid>
+        <Grid item xs={12} sm={4}>
+          <FormControl fullWidth variant="outlined" size="small">
+            <InputLabel>Model Name</InputLabel>
+            <Select value={selectedModelName} label="Model Name" onChange={handleChange(setSelectedModelName)}>
+              <MenuItem value="">All Models</MenuItem>
+              {modelNames.map(m => <MenuItem key={m} value={m}>{m}</MenuItem>)}
+            </Select>
+          </FormControl>
+        </Grid>
+      </Grid>
+      {results && (
+        <Box sx={{ flex: 1, overflow: 'auto', width: '100%', mt: 2 }}>
+          <Grid container spacing={2} sx={{ mb: 2 }}>
+            {performanceMetrics.map((metric, i) => <MetricBox key={i} metric={metric} />)}
+          </Grid>
+          <Box sx={{ width: '100%', height: '50vh', minHeight: 400, mb: 2, px: 0 }}>
+            <ResponsiveContainer width="100%" height="100%">
+              <ScatterChart margin={{ top: 20, right: 40, bottom: 40, left: 60 }}>
+                <CartesianGrid />
+                <XAxis type="number" dataKey="actual" name="Actual EAD" tickFormatter={value => value.toFixed(0)} label={{ value: 'Actual EAD', position: 'bottom', offset: 20 }} />
+                <YAxis type="number" dataKey="predicted" name="Predicted EAD" tickFormatter={value => value.toFixed(0)} label={{ value: 'Predicted EAD', angle: -90, position: 'insideLeft', offset: -30, style: { textAnchor: 'middle' } }} />
+                <RechartsTooltip contentStyle={{ backgroundColor: isDarkMode ? theme.palette.background.paper : 'white', color: isDarkMode ? theme.palette.text.primary : 'black' }} />
+                <Scatter name="EAD Comparison" data={comparisonData} fill="#8884d8" />
+                <ReferenceLine x={0} y={0} stroke="red" strokeDasharray="3 3" />
+              </ScatterChart>
+            </ResponsiveContainer>
           </Box>
-        )}
-      </Paper>
-    
+          {results.decile_data && (
+            <Box sx={{ mt: 4 }}>
+              <Typography variant="h6" gutterBottom>Decile Analysis</Typography>
+              <DecileTable data={results.decile_data.data} totalCount={results.decile_data.total_count} isDarkMode={isDarkMode} />
+            </Box>
+          )}
+        </Box>
+      )}
+    </Paper>
   );
 };
 

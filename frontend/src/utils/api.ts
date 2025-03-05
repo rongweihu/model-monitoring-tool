@@ -30,12 +30,15 @@ interface RatingTransitionResult {
   stability_rate: number;
   transition_matrix: Record<string, Record<string, number>>;
   significant_migrations: Record<string, Record<string, number>>;
+  previousRatings: string[];
+  currentRatings: string[];
 }
 
 interface AnalysisParams {
   quarter?: string;
   portfolio?: string;
   modelName?: string;
+  request_id?: string;
 }
 
 interface LGDUploadResponse {
@@ -97,7 +100,7 @@ export const api = {
     }
   },
 
-  analyzeRatingTransition: async (previousRatings: string[], currentRatings: string[]): Promise<RatingTransitionResult> => {
+  analyzeRatingTransition: async (previousRatings: string[], currentRatings: string[]): Promise<RatingTransitionResult | undefined> => {
     try {
       if (!previousRatings || !currentRatings) throw new Error('Previous and current ratings are required');
       if (previousRatings.length !== currentRatings.length) throw new Error('Previous and current ratings must have equal length');
@@ -113,7 +116,7 @@ export const api = {
         previous_ratings: sanitizedPrevRatings,
         current_ratings: sanitizedCurrRatings,
       });
-      return response.data;
+      return { previousRatings: sanitizedPrevRatings, currentRatings: sanitizedCurrRatings };
     } catch (error) {
       handleApiError(error, 'Rating Transition Analysis');
     }
@@ -161,7 +164,7 @@ export const api = {
     }
   },
 
-  uploadLGD: async (file: File): Promise<LGDUploadResponse> => {
+  uploadLGD: async (file: File): Promise<LGDUploadResponse | undefined> => {
     const formData = new FormData();
     formData.append('file', file);
 
@@ -312,21 +315,6 @@ export const api = {
     }
   },
 
-  deleteDataset: async (datasetId: number) => {
-    try {
-      const response = await axios.delete(`${BASE_URL}/api/database/datasets/${datasetId}`);
-      return response.data;
-    } catch (error) {
-      console.error('Error deleting dataset:', error);
-      if (isAxiosError(error)) {
-        const serverError = error.response?.data;
-        const errorMessage = serverError?.error || serverError?.details || serverError?.message || error.message;
-        throw new Error(`Dataset Delete Failed: ${errorMessage}`);
-      }
-      throw error;
-    }
-  },
-
   getAnalysisResult: async (resultId: number) => {
     try {
       const response = await axios.get(`${BASE_URL}/api/database/analysis-results/${resultId}`);
@@ -337,21 +325,6 @@ export const api = {
         const serverError = error.response?.data;
         const errorMessage = serverError?.error || serverError?.details || serverError?.message || error.message;
         throw new Error(`Analysis Result Fetch Failed: ${errorMessage}`);
-      }
-      throw error;
-    }
-  },
-
-  deleteAnalysisResult: async (resultId: number) => {
-    try {
-      const response = await axios.delete(`${BASE_URL}/api/database/analysis-results/${resultId}`);
-      return response.data;
-    } catch (error) {
-      console.error('Error deleting analysis result:', error);
-      if (isAxiosError(error)) {
-        const serverError = error.response?.data;
-        const errorMessage = serverError?.error || serverError?.details || serverError?.message || error.message;
-        throw new Error(`Analysis Result Delete Failed: ${errorMessage}`);
       }
       throw error;
     }

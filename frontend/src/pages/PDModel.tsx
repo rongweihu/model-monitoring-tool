@@ -9,6 +9,7 @@ import {
 import InfoIcon from '@mui/icons-material/Info';
 import { Tooltip as MUITooltip } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
+import { debounce } from 'lodash';
 import { api } from '../utils/api';
 
 // === Interfaces ===
@@ -56,7 +57,6 @@ interface WOEPlotData {
   total_count?: number;
   default_count?: number;
 }
-
 // === Utility Components ===
 const TabPanel: React.FC<TabPanelProps> = ({ children, value, index }) => (
   <div role="tabpanel" hidden={value !== index} id={`tabpanel-${index}`} aria-labelledby={`tab-${index}`} style={{ minHeight: '600px' }}>
@@ -98,6 +98,7 @@ const PDModel: React.FC = () => {
   const [pdAnalysisResults, setPDAnalysisResults] = useState<PDAnalysisData | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isInitialFetch, setIsInitialFetch] = useState(true);
   const [giniThreshold, setGiniThreshold] = useState(0.3);
   const [ksThreshold, setKsThreshold] = useState(0.45);
   const [sortingMethod, setSortingMethod] = useState<'PD_1_YR' | 'TTCReportingRating'>('PD_1_YR');
@@ -123,12 +124,14 @@ const PDModel: React.FC = () => {
     }
   };
 
-  // Fetch PD Analysis Data
-  const fetchPDAnalysis = async () => {
+  // Fetch PD Analysis Data with Debouncing
+  const fetchPDAnalysis = debounce(async () => {
     setIsLoading(true);
     setError(null);
+    const requestId = `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
     try {
-      const response = (await api.analyzePD({ sortingMethod })) as PDAnalysisData;
+      console.log('Fetching PD analysis with:', { sortingMethod, requestId });
+      const response = (await api.analyzePD({ sortingMethod, request_id: requestId })) as PDAnalysisData;
       if (!response) throw new Error('No PD analysis results received');
 
       setPDAnalysisResults(response);
@@ -147,8 +150,9 @@ const PDModel: React.FC = () => {
       setPDAnalysisResults(null);
     } finally {
       setIsLoading(false);
+      if (isInitialFetch) setIsInitialFetch(false);
     }
-  };
+  }, 300); // 300ms debounce delay
 
   // Effects
   useEffect(() => {
@@ -160,6 +164,7 @@ const PDModel: React.FC = () => {
 
   useEffect(() => {
     fetchPDAnalysis();
+    return () => fetchPDAnalysis.cancel(); // Cleanup debounce on unmount
   }, [sortingMethod]);
 
   // Handlers
@@ -172,8 +177,8 @@ const PDModel: React.FC = () => {
     if (!pdAnalysisResults) return <Typography color="error">No data available</Typography>;
 
     const { discriminatory_power } = pdAnalysisResults;
-    const giniCoefficient = discriminatory_power?.gini?.gini_coefficient ?? 0; // Fallback to 0 if undefined
-    const ksStatistic = discriminatory_power?.ks_test?.ks_statistic ?? 0; // Fallback to 0 if undefined
+    const giniCoefficient = discriminatory_power?.gini?.gini_coefficient ?? 0;
+    const ksStatistic = discriminatory_power?.ks_test?.ks_statistic ?? 0;
 
     return (
       <Box>
@@ -349,7 +354,6 @@ const PDModel: React.FC = () => {
       </Grid>
     );
   };
-
   const VariableFilterDropdown: React.FC<{
     variables: [string, any][];
     selected: string[];
@@ -401,16 +405,12 @@ const PDModel: React.FC = () => {
   };
 
   const WOEPlot: React.FC<{ woeData: WOEPlotData[]; isCategorical: boolean }> = ({ woeData, isCategorical }) => {
-    // Format numeric x values to have at most 2 decimal places
     const normalizedData = woeData.map((item, i) => {
       const xValue = item.x !== undefined ? item.x : (item.bin_number !== undefined ? item.bin_number : i);
-      // Format numeric x values to have at most 2 decimal places
       const formattedX = typeof xValue === 'number' && !isCategorical ? Number(xValue.toFixed(2)) : xValue;
-      
       return {
         x: formattedX,
         y: item.y !== undefined ? item.y : (item.woe !== undefined ? item.woe : 0),
-        // For numeric variables, ensure the label also has at most 2 decimal places
         label: isCategorical 
           ? (item.label || item.bin_range || `Category ${i}`) 
           : (item.label 
@@ -432,13 +432,11 @@ const PDModel: React.FC = () => {
             height={isCategorical ? 80 : 40} 
             tick={{ fontSize: 10, transform: isCategorical ? 'translate(0, 10)' : undefined }}
             label={{ value: isCategorical ? 'Categories' : 'Mean Value', position: 'insideBottom', offset: isCategorical ? -15 : -5 }}
-            // Format the ticks to show at most 2 decimal places for numeric variables
             tickFormatter={isCategorical ? undefined : (value) => typeof value === 'number' ? value.toFixed(2) : value}
           />
           <YAxis label={{ value: 'Weight of Evidence (WOE)', angle: -90, position: 'insideLeft' }} />
           <RechartsTooltip 
             contentStyle={{ backgroundColor: isDarkMode ? theme.palette.background.paper : 'white', color: isDarkMode ? theme.palette.text.primary : 'black' }}
-            // Format tooltip values to show at most 2 decimal places for x-axis
             formatter={(value, name) => [value, name]}
             labelFormatter={(label) => typeof label === 'number' ? label.toFixed(2) : label}
           />
@@ -507,22 +505,9 @@ const PDModel: React.FC = () => {
                         {data.iv?.details?.bins?.map((bin: any, i: number) => {
                           const woeValue = bin.woe || data.iv?.details?.woe?.[i] || 0;
                           const ivBinValue = data.iv?.details?.bin_details?.iv_per_bin?.[i] || bin.iv_bin || 0;
-                          // Use bin_range from CSI data for numeric, woeData.label for categorical
-                          let binLabel;
-                          if (isCategorical) {
-                            binLabel = woeData[i]?.label || bin.bin_range || `Category ${i}`;
-                          } else {
-                            // For numeric variables, prioritize bin_range from bin object, then CSI data
-                            if (bin.bin_range) {
-                              binLabel = bin.bin_range;
-                            } else if (data.iv.details.bin_details.bin_range[String(i)]) {
-                              binLabel = data.iv.details.bin_details.bin_range[String(i)]
-                            } else if (data.csi_bin_details && data.csi_bin_details[String(i)] && data.csi_bin_details[String(i)].bin_range) {
-                              binLabel = data.csi_bin_details[String(i)].bin_range;
-                            } else {
-                              binLabel = `Bin ${i}`;
-                            }
-                          }
+                          let binLabel = isCategorical 
+                            ? (woeData[i]?.label || bin.bin_range || `Category ${i}`)
+                            : (bin.bin_range || (data.csi_bin_details && data.csi_bin_details[String(i)]?.bin_range) || `Bin ${i}`);
                           const totalCount = bin.total_count || 0;
                           const defaultCount = bin.default_count || 0;
 
@@ -608,7 +593,7 @@ const PDModel: React.FC = () => {
   if (error) return <Paper sx={{ p: 2, m: 2 }}><Typography color="error" variant="h6">Error Loading PD Analysis</Typography><Typography>{error}</Typography></Paper>;
 
   return (
-    <Paper elevation={3} sx={{ p: 2, bboxShadow: 3, borderRadius: 4  }}>
+    <Paper elevation={3} sx={{ p: 2, bboxShadow: 3, borderRadius: 4 }}>
       <Typography variant="h4" gutterBottom>PD Model Analysis</Typography>
       <Tabs value={tabValue} onChange={handleTabChange} sx={{ borderBottom: 1, borderColor: 'divider', mb: 2 }} variant="scrollable" scrollButtons="auto">
         <Tab label="Discriminatory Power" />
