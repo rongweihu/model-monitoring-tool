@@ -2,7 +2,7 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import { Box, CssBaseline, ThemeProvider, createTheme } from '@mui/material';
 import { useState, useMemo } from 'react';
 
-import Summary from './pages/Summary';
+
 import PDModel from './pages/PDModel';
 import LGDModel from './pages/LGDModel';
 import EADModel from './pages/EADModel';
@@ -26,16 +26,14 @@ function App() {
       palette: {
         mode: isDarkMode ? 'dark' : 'light',
         primary: {
-          main: isDarkMode ? '#90caf9' : '#1976d2',
+          main: isDarkMode ? '#ffe600' : '#FFC107', // EY Yellow as primary color
         },
         background: {
-          default: isDarkMode ? '#121212' : '#f4f4f4',
-          paper: isDarkMode ? '#1d1d1d' : '#ffffff',
+          default: isDarkMode ? '#252525' : '#F5F5F5', // Dark gray for dark mode, light gray for light mode
+          paper: isDarkMode ? '#303030' : '#FFFFFF',   // Slightly lighter dark gray, pure white for light
         },
       },
-    }),
-    [isDarkMode]
-  );
+    }), [isDarkMode]);
 
   // Theme is managed by Layout component
 
@@ -46,7 +44,7 @@ function App() {
           <CssBaseline />
           <Layout>
             <Routes>
-              <Route path="/" element={<Summary />} />
+              <Route path="/" element={<Introduction />} />
               <Route path="/introduction" element={<Introduction />} />
               <Route path="/data-upload" element={<DataUpload />} />
               <Route path="/user-inputs" element={<UserInputs />} />

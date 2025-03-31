@@ -44,10 +44,10 @@ const UploadSection: React.FC<{
 const DataUpload: React.FC = () => {
   const [files, setFiles] = useState<{
     macro?: File;
+    pd_baseline?: File;
     pd?: File;
     lgd?: File;
     ead?: File;
-    pd_baseline?: File;
   }>({});
   const [uploadStatus, setUploadStatus] = useState<{
     success?: string;
@@ -79,8 +79,8 @@ const DataUpload: React.FC = () => {
 
   const uploadSections = [
     { type: 'macro' as const, title: 'Macro Data' },
-    { type: 'pd' as const, title: 'PD Model Data' },
     { type: 'pd_baseline' as const, title: 'PD Baseline Data (for PSI/CSI)' },
+    { type: 'pd' as const, title: 'PD Model Data' },
     { type: 'lgd' as const, title: 'LGD Model Data' },
     { type: 'ead' as const, title: 'EAD Model Data' },
   ];

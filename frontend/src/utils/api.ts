@@ -100,28 +100,6 @@ export const api = {
     }
   },
 
-  analyzeRatingTransition: async (previousRatings: string[], currentRatings: string[]): Promise<RatingTransitionResult | undefined> => {
-    try {
-      if (!previousRatings || !currentRatings) throw new Error('Previous and current ratings are required');
-      if (previousRatings.length !== currentRatings.length) throw new Error('Previous and current ratings must have equal length');
-
-      const sanitizedPrevRatings = previousRatings.map(r => r?.toString().trim() || '').filter(r => r);
-      const sanitizedCurrRatings = currentRatings.map(r => r?.toString().trim() || '').filter(r => r);
-
-      if (sanitizedPrevRatings.length === 0 || sanitizedCurrRatings.length === 0) {
-        throw new Error('No valid ratings provided');
-      }
-
-      const response = await axios.post<RatingTransitionResult>(`${BASE_URL}/api/analyze/rating_transition`, {
-        previous_ratings: sanitizedPrevRatings,
-        current_ratings: sanitizedCurrRatings,
-      });
-      return { previousRatings: sanitizedPrevRatings, currentRatings: sanitizedCurrRatings };
-    } catch (error) {
-      handleApiError(error, 'Rating Transition Analysis');
-    }
-  },
-
   analyzeLGD: async (params: AnalysisParams) => {
     try {
       const response = await axios.post(`${BASE_URL}/api/analyze/lgd`, params);

@@ -1204,49 +1204,6 @@ def save_user_thresholds() -> Tuple[Dict[str, Any], int]:
         logger.error(f"Error saving thresholds: {str(e)}")
         return jsonify({'error': str(e)}), 500
 
-# --- Rating Transition Endpoint ---
-@app.route('/api/analyze/rating_transition', methods=['POST'])
-def analyze_rating_transition() -> Tuple[Dict[str, Any], int]:
-    """Analyze rating transitions between two periods."""
-    try:
-        if not request.is_json:
-            logger.error('Rating transition analysis - Invalid request format')
-            return jsonify({'error': 'Invalid request', 'details': 'Request must be in JSON format'}), 400
-
-        data = request.get_json()
-        prev_ratings = data.get('previous_ratings')
-        curr_ratings = data.get('current_ratings')
-
-        if not prev_ratings or not curr_ratings:
-            logger.error('Rating transition analysis - Missing ratings data')
-            return jsonify({'error': 'Invalid input', 'details': 'Both previous and current ratings are required'}), 400
-
-        try:
-            prev_ratings = pd.Series([str(r).strip() for r in prev_ratings])
-            curr_ratings = pd.Series([str(r).strip() for r in curr_ratings])
-        except Exception as e:
-            logger.error(f'Rating conversion error: {e}')
-            return jsonify({'error': 'Data conversion failed', 'details': 'Unable to convert ratings to valid format'}), 400
-
-        if len(prev_ratings) != len(curr_ratings):
-            logger.error('Rating transition analysis - Mismatched ratings length')
-            return jsonify({'error': 'Length mismatch', 'details': 'Previous and current ratings must have equal length'}), 400
-
-        valid_mask = ~(prev_ratings.isna() | curr_ratings.isna() | (prev_ratings == '') | (curr_ratings == ''))
-        prev_ratings = prev_ratings[valid_mask]
-        curr_ratings = curr_ratings[valid_mask]
-
-        if len(prev_ratings) == 0:
-            logger.error('Rating transition analysis - No valid ratings')
-            return jsonify({'error': 'No valid ratings', 'details': 'All provided ratings are invalid or empty'}), 400
-
-        results = ModelMonitor.rating_transition_analysis(prev_ratings, curr_ratings)
-        logger.info(f'Rating Transition Analysis: Total Transitions: {len(prev_ratings)}, Previous Unique Ratings: {set(prev_ratings)}, Current Unique Ratings: {set(curr_ratings)}')
-        return jsonify(convert_numpy_types(results)), 200
-    except Exception as e:
-        logger.error(f"Unexpected error in rating transition analysis: {str(e)}")
-        return jsonify({'error': 'Unexpected error', 'details': str(e)}), 500
-
 # --- Macro Model Endpoints ---
 @app.route('/api/upload/macro', methods=['POST'])
 def upload_macro_file() -> Tuple[Dict[str, Any], int]:
