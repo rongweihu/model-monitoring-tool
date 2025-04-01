@@ -83,7 +83,7 @@ const DEFAULT_THRESHOLDS: MacroModelThresholds = {
   stationarity_threshold: 0.05,
 };
 
-const CHART_COLORS = ['#8884d8', '#82ca9d', '#ffc658'];
+const CHART_COLORS = ['#42A5F5', '#3cd644', '#FFCA28']; // Updated to brighter colors: Bright Blue, Green, Bright Yellow
 
 // === Utility Functions ===
 const safeToFixed = (value: number | undefined | null, decimals: number = 4): string =>
@@ -94,9 +94,9 @@ const getNormalityInterpretation = (result: NormalityResult): string => {
   const critValues = result['Critical Values'];
   const sigLevels = result['Significance Level'];
   const firstGreater = critValues.findIndex(cv => cv > stat);
-  if (firstGreater === -1) return `Model error is not normally distributed (reject null hypothesis) at significance level of ${sigLevels[sigLevels.length - 1]}%`;
-  if (firstGreater === 0) return `Model error is normally distributed (fail to reject null hypothesis) at all tested significance levels`;
-  return `Model error is normally distributed (fail to reject null hypothesis) at significance level of ${sigLevels[firstGreater]}%`;
+  if (firstGreater === -1) return `FAIL: Model error is not normally distributed (reject null hypothesis) at significance level of ${sigLevels[sigLevels.length - 1]}%`;
+  if (firstGreater === 0) return `PASS: Model error is normally distributed (fail to reject null hypothesis) at all tested significance levels`;
+  return `PASS: Model error is normally distributed (fail to reject null hypothesis) at significance level of ${sigLevels[firstGreater]}%`;
 };
 
 const getHeteroscedasticityInterpretation = (pValue: number): string => {
@@ -106,9 +106,18 @@ const getHeteroscedasticityInterpretation = (pValue: number): string => {
 };
 
 // === Reusable Components ===
-const TestCard: React.FC<{ title: string | JSX.Element; children: React.ReactNode; sx?: any }> = ({ title, children, sx }) => (
+const TestCard: React.FC<{ title: string | JSX.Element; children: React.ReactNode; sx?: any; isDarkMode?: boolean }> = ({ title, children, sx, isDarkMode }) => (
   <Paper elevation={3} sx={{ border: '2px solid rgba(0, 0, 0, 0.2)', borderRadius: 2, p: 2, mb: 2, ...sx }}>
-    <Typography variant="h6" sx={{ mb: 2, pb: 1, borderBottom: '1px solid rgba(0, 0, 0, 0.1)', fontWeight: 'bold', color: 'primary.main' }}>
+    <Typography
+      variant="h6"
+      sx={{
+        mb: 2,
+        pb: 1,
+        borderBottom: '1px solid rgba(0, 0, 0, 0.1)',
+        fontWeight: 'bold',
+        color: isDarkMode ? 'white' : 'primary.main', // White in dark mode, primary.main in light mode
+      }}
+    >
       {title}
     </Typography>
     {children}
@@ -143,12 +152,13 @@ const TestResultChip: React.FC<{ test: string; result: any }> = ({ test, result 
 
 // === Sub-Components ===
 const NormalityTestSection: React.FC<{ results: MacroModelResults; theme: any }> = ({ results, theme }) => {
+  const isDarkMode = theme.palette.mode === 'dark';
   const { model_error } = results.normality_results;
   const normalityViz = model_error.normality_visualization;
   const interpretation = getNormalityInterpretation(model_error);
 
   return (
-    <TestCard title="Normality Test (Anderson-Darling Test)">
+    <TestCard title="Normality Test (Anderson-Darling Test)" isDarkMode={isDarkMode}>
       <TableContainer component={Paper} variant="outlined" style={{ padding: '16px', width: '100%', margin: '0 auto' }}>
         <Table>
           <TableBody>
@@ -172,9 +182,10 @@ const NormalityTestSection: React.FC<{ results: MacroModelResults; theme: any }>
                     <strong>Anderson-Darling Normality Test:</strong>
                     <br /><br />
                     <ul>
-                      <li>Statistics &lt; critical value at certain significance level: Fail to reject null hypothesis</li>
-                      <li>Suggests the data is likely normally distributed</li>
-                      <li>Indicates residuals follow a normal distribution</li>
+                    <li>Statistics &lt; critical value at certain significance level: Fail to reject null hypothesis</li>
+                    <li>Suggests the data is likely normally distributed</li>
+                    <li>Indicates residuals follow a normal distribution</li>
+
                     </ul>
                     <br />
                     A normal distribution of residuals is crucial for reliable statistical inference and model validity.
@@ -183,66 +194,148 @@ const NormalityTestSection: React.FC<{ results: MacroModelResults; theme: any }>
                   </MUITooltip>
                 </Box>
               </TableCell>
-              <TableCell sx={{ color: interpretation.includes('normally distributed') ? 'green' : 'red' }}>{interpretation}</TableCell>
+              <TableCell sx={{ color: interpretation.includes('normally distributed') ? '#3cd644' : '#f54141' }}>{interpretation}</TableCell>
             </TableRow>
             {normalityViz && (
               <>
                 <TableRow>
                   <TableCell colSpan={2} rowSpan={3}>
-                    <TestCard title="Model Error Distribution Analysis">
-                      <Typography variant="subtitle1" sx={{ textAlign: 'center', fontWeight: 'bold', marginBottom: 2 }}>
+                    <TestCard title="Model Error Distribution Analysis" isDarkMode={isDarkMode}>
+                      <Typography variant="subtitle1" sx={{ textAlign: 'center', fontWeight: 'bold', marginBottom: 2, color: isDarkMode ? 'white' : 'text.primary' }}>
                         Model Error Histogram with Normal Distribution Curve
                       </Typography>
                       <Box sx={{ width: '100%', height: 450 }}>
                         <ResponsiveContainer>
-                          <ComposedChart width={500} height={450} data={normalityViz.normal_curve.x.map((x: number, i: number) => {
-                            const histogramIndex = normalityViz.histogram.x.findIndex((histX, index) => x >= histX && x <= normalityViz.histogram.x[index + 1]);
-                            return {
-                              x,
-                              histogram: histogramIndex !== -1 ? normalityViz.histogram.y[histogramIndex] : 0,
-                              normalCurve: normalityViz.normal_curve.y[i],
-                            };
-                          })}>
-                            <CartesianGrid strokeDasharray="3 3" />
-                            <XAxis type="number" dataKey="x" domain={['auto', 'auto']} label={{ value: 'Model Error', position: 'insideBottom', offset: -5 }} />
-                            <YAxis label={{ value: 'Density', angle: -90, position: 'insideLeft' }} />
-                            <RechartsTooltip contentStyle={{
-                              backgroundColor: theme.palette.background.paper,
-                              color: theme.palette.text.primary,
-                              border: `1px solid ${theme.palette.divider}`,
-                              borderRadius: '4px',
-                              boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
-                            }} labelStyle={{ color: theme.palette.text.primary, fontWeight: 'bold' }} itemStyle={{ color: theme.palette.text.secondary }} />
-                            <Bar dataKey="histogram" fill="#8884d8" name="Histogram" barSize={80} data={normalityViz.histogram.x.map((x, i) => ({ x, histogram: normalityViz.histogram.y[i] }))} />
-                            <Line type="monotone" dataKey="normalCurve" stroke="#ff7300" dot={false} name="Normal Distribution" />
+                          <ComposedChart
+                            width={500}
+                            height={450}
+                            data={normalityViz.normal_curve.x.map((x: number, i: number) => {
+                              const histogramIndex = normalityViz.histogram.x.findIndex((histX, index) => x >= histX && x <= normalityViz.histogram.x[index + 1]);
+                              return {
+                                x,
+                                histogram: histogramIndex !== -1 ? normalityViz.histogram.y[histogramIndex] : 0,
+                                normalCurve: normalityViz.normal_curve.y[i],
+                              };
+                            })}
+                          >
+                            <CartesianGrid stroke={isDarkMode ? "#616161" : "#CCCCCC"} strokeDasharray="3 3" />
+                            <XAxis
+                              type="number"
+                              dataKey="x"
+                              domain={['auto', 'auto']}
+                              label={{
+                                value: 'Model Error',
+                                position: 'insideBottom',
+                                offset: -5,
+                                fill: isDarkMode ? "#E0E0E0" : "#000000",
+                              }}
+                              stroke={isDarkMode ? "#E0E0E0" : "#000000"}
+                              tick={{ fill: isDarkMode ? "#E0E0E0" : "#000000" }}
+                            />
+                            <YAxis
+                              label={{
+                                value: 'Density',
+                                angle: -90,
+                                position: 'insideLeft',
+                                fill: isDarkMode ? "#E0E0E0" : "#000000",
+                              }}
+                              stroke={isDarkMode ? "#E0E0E0" : "#000000"}
+                              tick={{ fill: isDarkMode ? "#E0E0E0" : "#000000" }}
+                            />
+                            <RechartsTooltip
+                              contentStyle={{
+                                backgroundColor: isDarkMode ? theme.palette.background.paper : 'white',
+                                color: isDarkMode ? theme.palette.text.primary : 'black',
+                                border: `1px solid ${isDarkMode ? "#616161" : "#CCCCCC"}`,
+                                fontSize: '14px',
+                              }}
+                              labelStyle={{ color: isDarkMode ? theme.palette.text.primary : 'black', fontWeight: 'bold' }}
+                              itemStyle={{ color: isDarkMode ? theme.palette.text.secondary : 'black' }}
+                            />
+                            <Bar
+                              dataKey="histogram"
+                              fill="#42A5F5" // Bright blue
+                              name="Histogram"
+                              barSize={80}
+                              data={normalityViz.histogram.x.map((x, i) => ({ x, histogram: normalityViz.histogram.y[i] }))}
+                            />
+                            <Line
+                              type="monotone"
+                              dataKey="normalCurve"
+                              stroke="#FFCA28" // Bright yellow
+                              dot={false}
+                              name="Normal Distribution"
+                              strokeWidth={2}
+                            />
                             <Legend verticalAlign="bottom" height={36} layout="horizontal" align="center" wrapperStyle={{ bottom: -20, left: 0, right: 0 }} />
                           </ComposedChart>
                         </ResponsiveContainer>
                       </Box>
-                      <Typography variant="subtitle1" sx={{ textAlign: 'center', fontWeight: 'bold', marginTop: 4, marginBottom: 2 }}>
+                      <Typography variant="subtitle1" sx={{ textAlign: 'center', fontWeight: 'bold', marginTop: 4, marginBottom: 2, color: isDarkMode ? 'white' : 'text.primary' }}>
                         Q-Q Plot of Model Error
                       </Typography>
                       <Box sx={{ width: '100%', height: 400 }}>
                         <ResponsiveContainer>
                           <ComposedChart margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
-                            <CartesianGrid strokeDasharray="3 3" />
-                            <XAxis type="number" dataKey="x" name="Theoretical Quantiles" label={{ value: 'Theoretical Quantiles', position: 'bottom', offset: 0 }} />
-                            <YAxis type="number" dataKey="y" name="Sample Quantiles" label={{ value: 'Sample Quantiles', angle: -90, position: 'insideLeft' }} />
-                            <RechartsTooltip contentStyle={{
-                              backgroundColor: theme.palette.background.paper,
-                              color: theme.palette.text.primary,
-                              border: `1px solid ${theme.palette.divider}`,
-                              borderRadius: '4px',
-                              boxShadow: theme.palette.mode === 'dark' ? '0 2px 10px rgba(255,255,255,0.1)' : '0 2px 10px rgba(0,0,0,0.1)',
-                            }} labelStyle={{ color: theme.palette.text.primary, fontWeight: 'bold' }} itemStyle={{ color: theme.palette.text.secondary }} />
-                            <Line name="Reference Line" type="linear" dataKey="y" stroke="#ff7300" strokeWidth={2} dot={false} data={[
-                              { x: model_error.qq_plot!.line.x[0], y: model_error.qq_plot!.line.y[0] },
-                              { x: model_error.qq_plot!.line.x[1], y: model_error.qq_plot!.line.y[1] },
-                            ]} />
-                            <Scatter name="Q-Q Plot Points" data={model_error.qq_plot!.theoretical_quantiles.map((q, i) => ({
-                              x: q,
-                              y: model_error.qq_plot!.sample_quantiles[i],
-                            }))} fill="#8884d8" />
+                            <CartesianGrid stroke={isDarkMode ? "#616161" : "#CCCCCC"} strokeDasharray="3 3" />
+                            <XAxis
+                              type="number"
+                              dataKey="x"
+                              name="Theoretical Quantiles"
+                              label={{
+                                value: 'Theoretical Quantiles',
+                                position: 'bottom',
+                                offset: 0,
+                                fill: isDarkMode ? "#E0E0E0" : "#000000",
+                              }}
+                              stroke={isDarkMode ? "#E0E0E0" : "#000000"}
+                              tick={{ fill: isDarkMode ? "#E0E0E0" : "#000000" }}
+                            />
+                            <YAxis
+                              type="number"
+                              dataKey="y"
+                              name="Sample Quantiles"
+                              label={{
+                                value: 'Sample Quantiles',
+                                angle: -90,
+                                position: 'insideLeft',
+                                fill: isDarkMode ? "#E0E0E0" : "#000000",
+                              }}
+                              stroke={isDarkMode ? "#E0E0E0" : "#000000"}
+                              tick={{ fill: isDarkMode ? "#E0E0E0" : "#000000" }}
+                            />
+                            <RechartsTooltip
+                              contentStyle={{
+                                backgroundColor: isDarkMode ? theme.palette.background.paper : 'white',
+                                color: isDarkMode ? theme.palette.text.primary : 'black',
+                                border: `1px solid ${isDarkMode ? "#616161" : "#CCCCCC"}`,
+                                fontSize: '14px',
+                              }}
+                              labelStyle={{ color: isDarkMode ? theme.palette.text.primary : 'black', fontWeight: 'bold' }}
+                              itemStyle={{ color: isDarkMode ? theme.palette.text.secondary : 'black' }}
+                            />
+                            <Line
+                              name="Reference Line"
+                              type="linear"
+                              dataKey="y"
+                              stroke="#FFCA28" // Bright yellow
+                              strokeWidth={2}
+                              dot={false}
+                              data={[
+                                { x: model_error.qq_plot!.line.x[0], y: model_error.qq_plot!.line.y[0] },
+                                { x: model_error.qq_plot!.line.x[1], y: model_error.qq_plot!.line.y[1] },
+                              ]}
+                            />
+                            <Scatter
+                              name="Q-Q Plot Points"
+                              data={model_error.qq_plot!.theoretical_quantiles.map((q, i) => ({
+                                x: q,
+                                y: model_error.qq_plot!.sample_quantiles[i],
+                              }))}
+                              fill="#42A5F5" // Bright blue
+                              stroke="#FFFFFF"
+                              strokeWidth={1}
+                            />
                             <Legend verticalAlign="bottom" height={36} layout="horizontal" align="center" wrapperStyle={{ bottom: -20, left: 0, right: 0 }} />
                           </ComposedChart>
                         </ResponsiveContainer>
@@ -266,11 +359,12 @@ const NormalityTestSection: React.FC<{ results: MacroModelResults; theme: any }>
 };
 
 const AutocorrelationTestSection: React.FC<{ results: MacroModelResults; theme: any }> = ({ results, theme }) => {
+  const isDarkMode = theme.palette.mode === 'dark';
   const { model_error } = results.autocorrelation_results;
   const { acf, pacf } = model_error;
 
   return (
-    <TestCard title="Autocorrelation Test (Durbin-Watson Test)">
+    <TestCard title="Autocorrelation Test (Durbin-Watson Test)" isDarkMode={isDarkMode}>
       <TableContainer component={Paper} variant="outlined" style={{ padding: '16px', width: '100%', margin: '0 auto' }}>
         <Table>
           <TableBody>
@@ -282,9 +376,10 @@ const AutocorrelationTestSection: React.FC<{ results: MacroModelResults; theme: 
                     <strong>Durbin-Watson Statistic Interpretation:</strong>
                     <br /><br />
                     <ul>
-                      <li>DW &lt; 1.5: Strong evidence of positive autocorrelation in model error</li>
-                      <li>1.5 ≤ DW ≤ 2.5: Little to no autocorrelation in model error</li>
-                      <li>DW &gt; 2.5: Strong evidence of negative autocorrelation in model error</li>
+                    <li>DW &lt; 1.5: Strong evidence of positive autocorrelation in model error</li>
+                    <li>1.5 ≤ DW ≤ 2.5: Little to no autocorrelation in model error</li>
+                    <li>DW &gt; 2.5: Strong evidence of negative autocorrelation in model error</li>
+
                     </ul>
                     <br />
                     Positive autocorrelation suggests that consecutive residuals are similar, indicating potential model specification issues or time-dependent patterns.
@@ -317,63 +412,155 @@ const AutocorrelationTestSection: React.FC<{ results: MacroModelResults; theme: 
             {acf && pacf && (
               <TableRow>
                 <TableCell colSpan={2}>
-                  <TestCard title="Autocorrelation and Partial Autocorrelation Analysis">
+                  <TestCard title="Autocorrelation and Partial Autocorrelation Analysis" isDarkMode={isDarkMode}>
                     <Grid container spacing={2}>
                       <Grid item xs={12} md={6}>
-                        <Typography variant="subtitle1" sx={{ textAlign: 'center', fontWeight: 'bold', marginBottom: 2 }}>
+                        <Typography variant="subtitle1" sx={{ textAlign: 'center', fontWeight: 'bold', marginBottom: 2, color: isDarkMode ? 'white' : 'text.primary' }}>
                           Autocorrelation Function (ACF)
                         </Typography>
                         <Box sx={{ width: '100%', height: 400 }}>
                           <ResponsiveContainer>
-                            <ComposedChart width={500} height={400} data={acf.lags.map((lag, i) => ({
-                              lag,
-                              acf: acf.acf_values[i],
-                              upperCI: i > 0 ? acf.confidence_interval.upper[i] : null,
-                              lowerCI: i > 0 ? acf.confidence_interval.lower[i] : null,
-                            }))}>
-                              <CartesianGrid strokeDasharray="3 3" />
-                              <XAxis dataKey="lag" type="number" label={{ value: 'Lag', position: 'insideBottom', offset: -5 }} />
-                              <YAxis label={{ value: 'Autocorrelation', angle: -90, position: 'insideLeft' }} />
-                              <RechartsTooltip contentStyle={{
-                                backgroundColor: theme.palette.background.paper,
-                                color: theme.palette.text.primary,
-                                border: `1px solid ${theme.palette.divider}`,
-                                borderRadius: '4px',
-                                boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
-                              }} labelStyle={{ color: theme.palette.text.primary, fontWeight: 'bold' }} itemStyle={{ color: theme.palette.text.secondary }} />
-                              <Bar dataKey="acf" fill="#8884d8" name="ACF" barSize={20} />
-                              <Line dataKey="upperCI" stroke="red" dot={false} name="Upper CI" strokeDasharray="5 5" />
-                              <Line dataKey="lowerCI" stroke="red" dot={false} name="Lower CI" strokeDasharray="5 5" />
+                            <ComposedChart
+                              width={500}
+                              height={400}
+                              data={acf.lags.map((lag, i) => ({
+                                lag,
+                                acf: acf.acf_values[i],
+                                upperCI: i > 0 ? acf.confidence_interval.upper[i] : null,
+                                lowerCI: i > 0 ? acf.confidence_interval.lower[i] : null,
+                              }))}
+                            >
+                              <CartesianGrid stroke={isDarkMode ? "#616161" : "#CCCCCC"} strokeDasharray="3 3" />
+                              <XAxis
+                                dataKey="lag"
+                                type="number"
+                                label={{
+                                  value: 'Lag',
+                                  position: 'insideBottom',
+                                  offset: -5,
+                                  fill: isDarkMode ? "#E0E0E0" : "#000000",
+                                }}
+                                stroke={isDarkMode ? "#E0E0E0" : "#000000"}
+                                tick={{ fill: isDarkMode ? "#E0E0E0" : "#000000" }}
+                              />
+                              <YAxis
+                                label={{
+                                  value: 'Autocorrelation',
+                                  angle: -90,
+                                  position: 'insideLeft',
+                                  fill: isDarkMode ? "#E0E0E0" : "#000000",
+                                }}
+                                stroke={isDarkMode ? "#E0E0E0" : "#000000"}
+                                tick={{ fill: isDarkMode ? "#E0E0E0" : "#000000" }}
+                              />
+                              <RechartsTooltip
+                                contentStyle={{
+                                  backgroundColor: isDarkMode ? theme.palette.background.paper : 'white',
+                                  color: isDarkMode ? theme.palette.text.primary : 'black',
+                                  border: `1px solid ${isDarkMode ? "#616161" : "#CCCCCC"}`,
+                                  fontSize: '14px',
+                                }}
+                                labelStyle={{ color: isDarkMode ? theme.palette.text.primary : 'black', fontWeight: 'bold' }}
+                                itemStyle={{ color: isDarkMode ? theme.palette.text.secondary : 'black' }}
+                              />
+                              <Bar
+                                dataKey="acf"
+                                fill="#42A5F5" // Bright blue
+                                name="ACF"
+                                barSize={20}
+                              />
+                              <Line
+                                dataKey="upperCI"
+                                stroke="#FF5252" // Bright red
+                                dot={false}
+                                name="Upper CI"
+                                strokeDasharray="5 5"
+                                strokeWidth={2}
+                              />
+                              <Line
+                                dataKey="lowerCI"
+                                stroke="#FF5252" // Bright red
+                                dot={false}
+                                name="Lower CI"
+                                strokeDasharray="5 5"
+                                strokeWidth={2}
+                              />
                               <Legend verticalAlign="bottom" height={36} layout="horizontal" align="center" wrapperStyle={{ bottom: -20, left: 0, right: 0 }} />
                             </ComposedChart>
                           </ResponsiveContainer>
                         </Box>
                       </Grid>
                       <Grid item xs={12} md={6}>
-                        <Typography variant="subtitle1" sx={{ textAlign: 'center', fontWeight: 'bold', marginBottom: 2 }}>
+                        <Typography variant="subtitle1" sx={{ textAlign: 'center', fontWeight: 'bold', marginBottom: 2, color: isDarkMode ? 'white' : 'text.primary' }}>
                           Partial Autocorrelation Function (PACF)
                         </Typography>
                         <Box sx={{ width: '100%', height: 400 }}>
                           <ResponsiveContainer>
-                            <ComposedChart width={500} height={400} data={pacf.lags.map((lag, i) => ({
-                              lag,
-                              pacf: pacf.pacf_values[i],
-                              upperCI: pacf.confidence_interval.upper[i],
-                              lowerCI: pacf.confidence_interval.lower[i],
-                            }))}>
-                              <CartesianGrid strokeDasharray="3 3" />
-                              <XAxis dataKey="lag" type="number" label={{ value: 'Lag', position: 'insideBottom', offset: -5 }} />
-                              <YAxis label={{ value: 'Partial Autocorrelation', angle: -90, position: 'insideLeft' }} />
-                              <RechartsTooltip contentStyle={{
-                                backgroundColor: theme.palette.background.paper,
-                                color: theme.palette.text.primary,
-                                border: `1px solid ${theme.palette.divider}`,
-                                borderRadius: '4px',
-                                boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
-                              }} labelStyle={{ color: theme.palette.text.primary, fontWeight: 'bold' }} itemStyle={{ color: theme.palette.text.secondary }} />
-                              <Bar dataKey="pacf" fill="#8884d8" name="PACF" barSize={20} />
-                              <Line dataKey="upperCI" stroke="red" dot={false} name="Upper CI" strokeDasharray="5 5" />
-                              <Line dataKey="lowerCI" stroke="red" dot={false} name="Lower CI" strokeDasharray="5 5" />
+                            <ComposedChart
+                              width={500}
+                              height={400}
+                              data={pacf.lags.map((lag, i) => ({
+                                lag,
+                                pacf: pacf.pacf_values[i],
+                                upperCI: pacf.confidence_interval.upper[i],
+                                lowerCI: pacf.confidence_interval.lower[i],
+                              }))}
+                            >
+                              <CartesianGrid stroke={isDarkMode ? "#616161" : "#CCCCCC"} strokeDasharray="3 3" />
+                              <XAxis
+                                dataKey="lag"
+                                type="number"
+                                label={{
+                                  value: 'Lag',
+                                  position: 'insideBottom',
+                                  offset: -5,
+                                  fill: isDarkMode ? "#E0E0E0" : "#000000",
+                                }}
+                                stroke={isDarkMode ? "#E0E0E0" : "#000000"}
+                                tick={{ fill: isDarkMode ? "#E0E0E0" : "#000000" }}
+                              />
+                              <YAxis
+                                label={{
+                                  value: 'Partial Autocorrelation',
+                                  angle: -90,
+                                  position: 'insideLeft',
+                                  fill: isDarkMode ? "#E0E0E0" : "#000000",
+                                }}
+                                stroke={isDarkMode ? "#E0E0E0" : "#000000"}
+                                tick={{ fill: isDarkMode ? "#E0E0E0" : "#000000" }}
+                              />
+                              <RechartsTooltip
+                                contentStyle={{
+                                  backgroundColor: isDarkMode ? theme.palette.background.paper : 'white',
+                                  color: isDarkMode ? theme.palette.text.primary : 'black',
+                                  border: `1px solid ${isDarkMode ? "#616161" : "#CCCCCC"}`,
+                                  fontSize: '14px',
+                                }}
+                                labelStyle={{ color: isDarkMode ? theme.palette.text.primary : 'black', fontWeight: 'bold' }}
+                                itemStyle={{ color: isDarkMode ? theme.palette.text.secondary : 'black' }}
+                              />
+                              <Bar
+                                dataKey="pacf"
+                                fill="#42A5F5" // Bright blue
+                                name="PACF"
+                                barSize={20}
+                              />
+                              <Line
+                                dataKey="upperCI"
+                                stroke="#FF5252" // Bright red
+                                dot={false}
+                                name="Upper CI"
+                                strokeDasharray="5 5"
+                                strokeWidth={2}
+                              />
+                              <Line
+                                dataKey="lowerCI"
+                                stroke="#FF5252" // Bright red
+                                dot={false}
+                                name="Lower CI"
+                                strokeDasharray="5 5"
+                                strokeWidth={2}
+                              />
                               <Legend verticalAlign="bottom" height={36} layout="horizontal" align="center" wrapperStyle={{ bottom: -20, left: 0, right: 0 }} />
                             </ComposedChart>
                           </ResponsiveContainer>
@@ -392,14 +579,9 @@ const AutocorrelationTestSection: React.FC<{ results: MacroModelResults; theme: 
 };
 
 const HeteroscedasticityTestSection: React.FC<{ results: MacroModelResults; theme: any }> = ({ results, theme }) => {
+  const isDarkMode = theme.palette.mode === 'dark';
   const { heteroscedasticity_results } = results;
   const interpretation = getHeteroscedasticityInterpretation(heteroscedasticity_results['p-value']);
-
-  // Debug data
-  console.log('Heteroscedasticity Data:', {
-    predicted_pd: heteroscedasticity_results.predicted_pd,
-    model_error: heteroscedasticity_results.model_error,
-  });
 
   const scatterData = heteroscedasticity_results.predicted_pd.map((x, i) => ({
     x,
@@ -407,7 +589,7 @@ const HeteroscedasticityTestSection: React.FC<{ results: MacroModelResults; them
   }));
 
   return (
-    <TestCard title="Heteroscedasticity Test (Breusch-Pagan Test)">
+    <TestCard title="Heteroscedasticity Test (Breusch-Pagan Test)" isDarkMode={isDarkMode}>
       <TableContainer component={Paper} variant="outlined" style={{ padding: '16px', width: '100%', margin: '0 auto' }}>
         <Table size="small">
           <TableBody>
@@ -433,47 +615,63 @@ const HeteroscedasticityTestSection: React.FC<{ results: MacroModelResults; them
       <Box sx={{ height: 20 }} />
       {heteroscedasticity_results.predicted_pd.length > 0 && (
         <Grid item xs={12}>
-          <TestCard title="Heteroscedasticity Analysis">
-            <Typography variant="subtitle1" sx={{ textAlign: 'center', fontWeight: 'bold', marginBottom: 2 }}>
+          <TestCard title="Heteroscedasticity Analysis" isDarkMode={isDarkMode}>
+            <Typography variant="subtitle1" sx={{ textAlign: 'center', fontWeight: 'bold', marginBottom: 2, color: isDarkMode ? 'white' : 'text.primary' }}>
               Model Error vs Predicted Probability of Default
             </Typography>
             <Box sx={{ width: '100%', height: 400 }}>
               <ResponsiveContainer>
                 <ScatterChart margin={{ top: 20, right: 40, bottom: 40, left: 60 }}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis 
-                    type="number" 
-                    dataKey="x" 
-                    name="Predicted PD" 
-                    tickFormatter={(value: number) => value.toFixed(4)} 
-                    label={{ value: 'Predicted Probability of Default', position: 'bottom', offset: 20 }} 
+                  <CartesianGrid stroke={isDarkMode ? "#616161" : "#CCCCCC"} strokeDasharray="3 3" />
+                  <XAxis
+                    type="number"
+                    dataKey="x"
+                    name="Predicted PD"
+                    tickFormatter={(value: number) => value.toFixed(4)}
+                    label={{
+                      value: 'Predicted Probability of Default',
+                      position: 'bottom',
+                      offset: 20,
+                      fill: isDarkMode ? "#E0E0E0" : "#000000",
+                    }}
+                    stroke={isDarkMode ? "#E0E0E0" : "#000000"}
+                    tick={{ fill: isDarkMode ? "#E0E0E0" : "#000000" }}
                   />
-                  <YAxis 
-                    type="number" 
-                    dataKey="y" 
-                    name="Model Error" 
-                    tickFormatter={(value: number) => value.toFixed(4)} 
-                    label={{ value: 'Model Error', angle: -90, position: 'insideLeft', offset: -30, style: { textAnchor: 'middle' } }} 
+                  <YAxis
+                    type="number"
+                    dataKey="y"
+                    name="Model Error"
+                    tickFormatter={(value: number) => value.toFixed(4)}
+                    label={{
+                      value: 'Model Error',
+                      angle: -90,
+                      position: 'insideLeft',
+                      offset: -30,
+                      style: { textAnchor: 'middle' },
+                      fill: isDarkMode ? "#E0E0E0" : "#000000",
+                    }}
+                    stroke={isDarkMode ? "#E0E0E0" : "#000000"}
+                    tick={{ fill: isDarkMode ? "#E0E0E0" : "#000000" }}
                   />
-                  <RechartsTooltip 
+                  <RechartsTooltip
                     cursor={{ strokeDasharray: '3 3' }}
                     formatter={(value: number, name: string) => {
-                      // Use entry.payload to access x and y directly
                       if (name === 'x') return [value.toFixed(4), 'Predicted PD'];
                       if (name === 'y') return [value.toFixed(4), 'Model Error'];
-                      return [value.toFixed(4), name]; // Fallback
+                      return [value.toFixed(4), name];
                     }}
                     content={({ active, payload }) => {
                       if (active && payload && payload.length) {
-                        const data = payload[0].payload; // Access the full data point
+                        const data = payload[0].payload;
                         return (
                           <div style={{
-                            backgroundColor: theme.palette.background.paper,
-                            color: theme.palette.text.primary,
-                            border: `1px solid ${theme.palette.divider}`,
+                            backgroundColor: isDarkMode ? theme.palette.background.paper : 'white',
+                            color: isDarkMode ? theme.palette.text.primary : 'black',
+                            border: `1px solid ${isDarkMode ? "#616161" : "#CCCCCC"}`,
                             borderRadius: '4px',
                             padding: '8px',
                             boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
+                            fontSize: '14px',
                           }}>
                             <p style={{ fontWeight: 'bold' }}>{`Predicted PD: ${data.x.toFixed(4)}`}</p>
                             <p>{`Model Error: ${data.y.toFixed(4)}`}</p>
@@ -483,11 +681,13 @@ const HeteroscedasticityTestSection: React.FC<{ results: MacroModelResults; them
                       return null;
                     }}
                   />
-                  <Scatter 
-                    name="Model Error vs Predicted PD" 
-                    data={scatterData} 
-                    fill="#8884d8" 
-                    fillOpacity={0.7} 
+                  <Scatter
+                    name="Model Error vs Predicted PD"
+                    data={scatterData}
+                    fill="#42A5F5" // Bright blue
+                    fillOpacity={0.7}
+                    stroke="#FFFFFF"
+                    strokeWidth={1}
                   />
                   <Legend verticalAlign="bottom" height={36} layout="horizontal" align="center" wrapperStyle={{ bottom: -20, left: 0, right: 0 }} />
                 </ScatterChart>
@@ -501,12 +701,13 @@ const HeteroscedasticityTestSection: React.FC<{ results: MacroModelResults; them
 };
 
 const ModelPerformanceSection: React.FC<{ results: MacroModelResults; thresholds: MacroModelThresholds; theme: any }> = ({ results, thresholds, theme }) => {
+  const isDarkMode = theme.palette.mode === 'dark';
   const { comparison_results } = results;
   const rSquaredPass = comparison_results['Adjusted R-squared'] >= thresholds.r_squared_threshold;
   const rmsePass = comparison_results['RMSE'] < thresholds.rmse_threshold;
 
   return (
-    <TestCard title="Model Performance">
+    <TestCard title="Model Performance" isDarkMode={isDarkMode}>
       <TableContainer component={Paper} variant="outlined" style={{ padding: '16px', width: '100%', margin: '0 auto' }}>
         <Table size="small">
           <TableBody>
@@ -549,42 +750,96 @@ const ModelPerformanceSection: React.FC<{ results: MacroModelResults; thresholds
       <Box sx={{ height: 20 }} />
       {comparison_results.actual_default_rate.length > 0 && (
         <Grid item xs={12}>
-          <TestCard title="Model Prediction Analysis">
-            <Typography variant="subtitle1" sx={{ textAlign: 'center', fontWeight: 'bold', marginBottom: 2 }}>
+          <TestCard title="Model Prediction Analysis" isDarkMode={isDarkMode}>
+            <Typography variant="subtitle1" sx={{ textAlign: 'center', fontWeight: 'bold', marginBottom: 2, color: isDarkMode ? 'white' : 'text.primary' }}>
               Predicted Probability of Default vs Actual Default Rate
             </Typography>
             <Box sx={{ width: '100%', height: 400 }}>
               <ResponsiveContainer>
                 <ComposedChart width={500} height={400}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis type="number" dataKey="x" name="Actual Default Rate" label={{ value: 'Actual Default Rate', position: 'insideBottom', offset: -5 }} />
-                  <YAxis type="number" dataKey="y" name="Predicted PD" label={{ value: 'Predicted Probability of Default', angle: -90, position: 'insideLeft' }} />
-                  <RechartsTooltip formatter={(value, name, props) => {
-                    const axisId = props.dataKey === 'Predicted PD' ? 'left' : 'right';
-                    return [`${value} (${axisId} axis)`, name];
-                  }} contentStyle={{
-                    backgroundColor: theme.palette.background.paper,
-                    color: theme.palette.text.primary,
-                    border: `1px solid ${theme.palette.divider}`,
-                    borderRadius: '4px',
-                    boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
-                  }} labelStyle={{ color: theme.palette.text.primary, fontWeight: 'bold' }} itemStyle={{ color: theme.palette.text.secondary }} />
-                  <Scatter name="Predicted PD vs Actual Default Rate" data={comparison_results.actual_default_rate.map((x, i) => ({
-                    x,
-                    y: comparison_results.predicted_pd[i],
-                  }))} fill="#8884d8" fillOpacity={0.7} />
+                  <CartesianGrid stroke={isDarkMode ? "#616161" : "#CCCCCC"} strokeDasharray="3 3" />
+                  <XAxis
+                    type="number"
+                    dataKey="x"
+                    name="Actual Default Rate"
+                    label={{
+                      value: 'Actual Default Rate',
+                      position: 'insideBottom',
+                      offset: -5,
+                      fill: isDarkMode ? "#E0E0E0" : "#000000",
+                    }}
+                    stroke={isDarkMode ? "#E0E0E0" : "#000000"}
+                    tick={{ fill: isDarkMode ? "#E0E0E0" : "#000000" }}
+                  />
+                  <YAxis
+                    type="number"
+                    dataKey="y"
+                    name="Predicted PD"
+                    label={{
+                      value: 'Predicted Probability of Default',
+                      angle: -90,
+                      position: 'insideLeft',
+                      fill: isDarkMode ? "#E0E0E0" : "#000000",
+                    }}
+                    stroke={isDarkMode ? "#E0E0E0" : "#000000"}
+                    tick={{ fill: isDarkMode ? "#E0E0E0" : "#000000" }}
+                  />
+                  <RechartsTooltip
+                    formatter={(value, name, props) => {
+                      const axisId = props.dataKey === 'Predicted PD' ? 'left' : 'right';
+                      return [`${value} (${axisId} axis)`, name];
+                    }}
+                    contentStyle={{
+                      backgroundColor: isDarkMode ? theme.palette.background.paper : 'white',
+                      color: isDarkMode ? theme.palette.text.primary : 'black',
+                      border: `1px solid ${isDarkMode ? "#616161" : "#CCCCCC"}`,
+                      fontSize: '14px',
+                    }}
+                    labelStyle={{ color: isDarkMode ? theme.palette.text.primary : 'black', fontWeight: 'bold' }}
+                    itemStyle={{ color: isDarkMode ? theme.palette.text.secondary : 'black' }}
+                  />
+                  <Scatter
+                    name="Predicted PD vs Actual Default Rate"
+                    data={comparison_results.actual_default_rate.map((x, i) => ({
+                      x,
+                      y: comparison_results.predicted_pd[i],
+                    }))}
+                    fill="#42A5F5" // Bright blue
+                    fillOpacity={0.7}
+                    stroke="#FFFFFF"
+                    strokeWidth={1}
+                  />
                   {comparison_results.trend_line && (
                     <>
-                      <Line name="Trend Line" type="linear" dataKey="y" stroke="#ff7300" strokeWidth={2} dot={false} data={[
-                        { x: comparison_results.trend_line.x[0], y: comparison_results.trend_line.y[0] },
-                        { x: comparison_results.trend_line.x[1], y: comparison_results.trend_line.y[1] },
-                      ]} />
-                      <text x={120} y={40} fill={theme.palette.text.primary} fontFamily="Arial, sans-serif" fontSize={14} fontWeight="bold" textAnchor="start" style={{
-                        backgroundColor: theme.palette.background.paper,
-                        padding: '4px 8px',
-                        borderRadius: '4px',
-                        boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-                      }}>{`Trend Line: y = ${comparison_results.trend_line.equation.slope.toFixed(4)}x + ${comparison_results.trend_line.equation.intercept.toFixed(4)}`}</text>
+                      <Line
+                        name="Trend Line"
+                        type="linear"
+                        dataKey="y"
+                        stroke="#FFCA28" // Bright yellow
+                        strokeWidth={2}
+                        dot={false}
+                        data={[
+                          { x: comparison_results.trend_line.x[0], y: comparison_results.trend_line.y[0] },
+                          { x: comparison_results.trend_line.x[1], y: comparison_results.trend_line.y[1] },
+                        ]}
+                      />
+                      <text
+                        x={120}
+                        y={40}
+                        fill={isDarkMode ? "#E0E0E0" : "#000000"}
+                        fontFamily="Arial, sans-serif"
+                        fontSize={14}
+                        fontWeight="bold"
+                        textAnchor="start"
+                        style={{
+                          backgroundColor: isDarkMode ? theme.palette.background.paper : 'white',
+                          padding: '4px 8px',
+                          borderRadius: '4px',
+                          boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                        }}
+                      >
+                        {`Trend Line: y = ${comparison_results.trend_line.equation.slope.toFixed(4)}x + ${comparison_results.trend_line.equation.intercept.toFixed(4)}`}
+                      </text>
                     </>
                   )}
                   <Legend verticalAlign="bottom" height={36} layout="horizontal" align="center" wrapperStyle={{ bottom: -20, left: 0, right: 0 }} />
@@ -599,6 +854,7 @@ const ModelPerformanceSection: React.FC<{ results: MacroModelResults; thresholds
 };
 
 const SummaryTab: React.FC<{ results: MacroModelResults; thresholds: MacroModelThresholds; theme: any }> = ({ results, thresholds, theme }) => {
+  const isDarkMode = theme.palette.mode === 'dark';
   const normalityInterpretation = getNormalityInterpretation(results.normality_results.model_error);
   const autocorrelationInterpretation = results.autocorrelation_results.model_error.Interpretation;
 
@@ -642,8 +898,11 @@ const SummaryTab: React.FC<{ results: MacroModelResults; thresholds: MacroModelT
             <TableRow>
               <TableCell>Model Performance</TableCell>
               <TableCell>
-                <Chip label={results.comparison_results['Adjusted R-squared'] >= thresholds.r_squared_threshold && results.comparison_results['RMSE'] < thresholds.rmse_threshold ? 'Pass' : 'Fail'}
-                  color={results.comparison_results['Adjusted R-squared'] >= thresholds.r_squared_threshold && results.comparison_results['RMSE'] < thresholds.rmse_threshold ? 'success' : 'error'} variant="outlined" />
+                <Chip
+                  label={results.comparison_results['Adjusted R-squared'] >= thresholds.r_squared_threshold && results.comparison_results['RMSE'] < thresholds.rmse_threshold ? 'Pass' : 'Fail'}
+                  color={results.comparison_results['Adjusted R-squared'] >= thresholds.r_squared_threshold && results.comparison_results['RMSE'] < thresholds.rmse_threshold ? 'success' : 'error'}
+                  variant="outlined"
+                />
               </TableCell>
               <TableCell>{`R-squared: ${safeToFixed(results.comparison_results['Adjusted R-squared'])} | RMSE: ${safeToFixed(results.comparison_results['RMSE'])}`}</TableCell>
             </TableRow>
@@ -652,33 +911,75 @@ const SummaryTab: React.FC<{ results: MacroModelResults; thresholds: MacroModelT
       </TableContainer>
       <Box sx={{ mt: 4, mb: 4 }}>
         <Paper variant="outlined" sx={{ p: 2 }}>
-          <Typography variant="h6" sx={{ mb: 2 }}>Model Performance Time Series</Typography>
+          <Typography variant="h6" sx={{ mb: 2, color: isDarkMode ? 'white' : 'text.primary' }}>Model Performance Time Series</Typography>
           <ResponsiveContainer width="100%" height={400}>
-            <LineChart data={results.time_series_data.map(item => ({
-              snapshot_ccyymm: item.snapshot_ccyymm,
-              'Predicted PD': item.pred_dr,
-              'Actual Default Rate': item.Defaultrate,
-            }))} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="snapshot_ccyymm" angle={-45} textAnchor="end" height={60} tick={{ fontSize: 12 }} />
-              <YAxis yAxisId="left" label={{ value: 'Rate', angle: -90, position: 'insideLeft', style: { textAnchor: 'middle' } }} />
-              <RechartsTooltip contentStyle={{
-                backgroundColor: theme.palette.background.paper,
-                color: theme.palette.text.primary,
-                border: `1px solid ${theme.palette.divider}`,
-                borderRadius: '4px',
-                boxShadow: theme.palette.mode === 'dark' ? '0 2px 10px rgba(255,255,255,0.1)' : '0 2px 10px rgba(0,0,0,0.1)',
-              }} labelStyle={{ color: theme.palette.text.primary, fontWeight: 'bold' }} itemStyle={{ color: theme.palette.text.secondary }} />
+            <LineChart
+              data={results.time_series_data.map(item => ({
+                snapshot_ccyymm: item.snapshot_ccyymm,
+                'Predicted PD': item.pred_dr,
+                'Actual Default Rate': item.Defaultrate,
+              }))}
+              margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+            >
+              <CartesianGrid stroke={isDarkMode ? "#616161" : "#CCCCCC"} strokeDasharray="3 3" />
+              <XAxis
+                dataKey="snapshot_ccyymm"
+                angle={-45}
+                textAnchor="end"
+                height={60}
+                tick={{ fontSize: 12, fill: isDarkMode ? "#E0E0E0" : "#000000" }}
+                stroke={isDarkMode ? "#E0E0E0" : "#000000"}
+              />
+              <YAxis
+                yAxisId="left"
+                label={{
+                  value: 'Rate',
+                  angle: -90,
+                  offset: -10,
+                  position: 'insideLeft',
+                  style: { textAnchor: 'middle' },
+                  fill: isDarkMode ? "#E0E0E0" : "#000000",
+                }}
+                stroke={isDarkMode ? "#E0E0E0" : "#000000"}
+                tick={{ fill: isDarkMode ? "#E0E0E0" : "#000000" }}
+              />
+              <RechartsTooltip
+                contentStyle={{
+                  backgroundColor: isDarkMode ? theme.palette.background.paper : 'white',
+                  color: isDarkMode ? theme.palette.text.primary : 'black',
+                  border: `1px solid ${isDarkMode ? "#616161" : "#CCCCCC"}`,
+                  fontSize: '14px',
+                }}
+                labelStyle={{ color: isDarkMode ? theme.palette.text.primary : 'black', fontWeight: 'bold' }}
+                itemStyle={{ color: isDarkMode ? theme.palette.text.secondary : 'black' }}
+                formatter={(value: number) => value.toFixed(4)}
+              />
               <Legend verticalAlign="top" height={36} />
-              <Line yAxisId="left" type="monotone" dataKey="Predicted PD" stroke="#8884d8" dot={{ r: 3 }} activeDot={{ r: 5 }} strokeWidth={2} />
-              <Line yAxisId="left" type="monotone" dataKey="Actual Default Rate" stroke="#82ca9d" dot={{ r: 3 }} activeDot={{ r: 5 }} strokeWidth={2} />
+              <Line
+                yAxisId="left"
+                type="monotone"
+                dataKey="Predicted PD"
+                stroke="#42A5F5" // Bright blue
+                dot={{ r: 3 }}
+                activeDot={{ r: 5 }}
+                strokeWidth={2}
+              />
+              <Line
+                yAxisId="left"
+                type="monotone"
+                dataKey="Actual Default Rate"
+                stroke="#82ca9d" // Green (already visible)
+                dot={{ r: 3 }}
+                activeDot={{ r: 5 }}
+                strokeWidth={2}
+              />
             </LineChart>
           </ResponsiveContainer>
         </Paper>
       </Box>
       {Object.keys(stationarityResults).length > 0 && (
         <TableContainer component={Paper} variant="outlined" sx={{ p: 2 }}>
-          <Typography variant="h6" sx={{ p: 2, pb: 0 }}>Macro Variable Stationarity Tests</Typography>
+          <Typography variant="h6" sx={{ p: 2, pb: 0, color: isDarkMode ? 'white' : 'text.primary' }}>Macro Variable Stationarity Tests</Typography>
           <Table>
             <TableHead>
               <TableRow>
@@ -705,6 +1006,7 @@ const SummaryTab: React.FC<{ results: MacroModelResults; thresholds: MacroModelT
 
 const StationarityTab: React.FC<{ results: MacroModelResults; thresholds: MacroModelThresholds; selectedSeries: string[]; setSelectedSeries: (series: string[]) => void; seriesOptions: string[] }> = ({ results, thresholds, selectedSeries, setSelectedSeries, seriesOptions }) => {
   const theme = useTheme();
+  const isDarkMode = theme.palette.mode === 'dark';
   const handleChange = (event: SelectChangeEvent<string[]>) => {
     const value = event.target.value as string[];
     setSelectedSeries(value.includes('clear-all') ? [] : value.filter(s => s !== 'snapshot_ccyymm'));
@@ -714,7 +1016,7 @@ const StationarityTab: React.FC<{ results: MacroModelResults; thresholds: MacroM
     <Grid container spacing={3}>
       {Object.entries(results.stationarity_results).map(([variable, stats]) => (
         <Grid item xs={12} key={variable}>
-          <TestCard title={`Stationarity Test - ${variable} (α = ${thresholds.stationarity_threshold})`}>
+          <TestCard title={`Stationarity Test - ${variable} (α = ${thresholds.stationarity_threshold})`} isDarkMode={isDarkMode}>
             <TableContainer component={Paper} variant="outlined" style={{ padding: '16px', width: '100%', margin: '0 auto' }}>
               <Table size="small">
                 <TableHead>
@@ -737,8 +1039,11 @@ const StationarityTab: React.FC<{ results: MacroModelResults; thresholds: MacroM
                       <TableCell>{safeToFixed(Number(stats[stat as keyof StationarityResult]))}</TableCell>
                       <TableCell>{safeToFixed(Number(stats[p as keyof StationarityResult]))}</TableCell>
                       <TableCell>
-                        <Chip label={Number(stats[p as keyof StationarityResult]) < thresholds.stationarity_threshold ? 'Stationary' : 'Non-Stationary'}
-                          color={Number(stats[p as keyof StationarityResult]) < thresholds.stationarity_threshold ? 'success' : 'error'} variant="outlined" />
+                        <Chip
+                          label={Number(stats[p as keyof StationarityResult]) < thresholds.stationarity_threshold ? 'Stationary' : 'Non-Stationary'}
+                          color={Number(stats[p as keyof StationarityResult]) < thresholds.stationarity_threshold ? 'success' : 'error'}
+                          variant="outlined"
+                        />
                       </TableCell>
                     </TableRow>
                   ))}
@@ -749,17 +1054,29 @@ const StationarityTab: React.FC<{ results: MacroModelResults; thresholds: MacroM
         </Grid>
       ))}
       <Grid item xs={12}>
-        <TestCard title={<Box display="flex" alignItems="center">
-          Time Series Visualization
-          <MUITooltip title="You can select up to two variables to plot. When two variables are selected, they will be displayed on separate Y-axes for better comparison." placement="right">
-            <HelpOutlineIcon color="action" sx={{ marginLeft: 1, fontSize: 20, cursor: 'help' }} />
-          </MUITooltip>
-        </Box>}>
+        <TestCard
+          title={
+            <Box display="flex" alignItems="center">
+              Time Series Visualization
+              <MUITooltip title="You can select up to two variables to plot. When two variables are selected, they will be displayed on separate Y-axes for better comparison." placement="right">
+                <HelpOutlineIcon color="action" sx={{ marginLeft: 1, fontSize: 20, cursor: 'help' }} />
+              </MUITooltip>
+            </Box>
+          }
+          isDarkMode={isDarkMode}
+        >
           <FormControl fullWidth>
             <InputLabel id="series-select-label">Select Series</InputLabel>
-            <Select multiple value={selectedSeries} onChange={handleChange} renderValue={selected => selected.join(', ')} displayEmpty MenuProps={{
-              PaperProps: { style: { maxHeight: 48 * 4.5 + 8, width: 250 } },
-            }}>
+            <Select
+              multiple
+              value={selectedSeries}
+              onChange={handleChange}
+              renderValue={selected => selected.join(', ')}
+              displayEmpty
+              MenuProps={{
+                PaperProps: { style: { maxHeight: 48 * 4.5 + 8, width: 250 } },
+              }}
+            >
               <MenuItem key="clear-all" value="clear-all" onClick={() => setSelectedSeries([])}>
                 <ListItemText primary="Clear All" />
               </MenuItem>
@@ -774,23 +1091,63 @@ const StationarityTab: React.FC<{ results: MacroModelResults; thresholds: MacroM
           <Box sx={{ width: '100%', height: 400 }}>
             <ResponsiveContainer>
               <LineChart data={results.time_series_data}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="snapshot_ccyymm" name="Time" />
-                <YAxis yAxisId="left" label={{ value: selectedSeries[0] || 'Left Axis', angle: -90, position: 'insideLeft' }} />
-                {selectedSeries.length > 1 && <YAxis yAxisId="right" orientation="right" label={{ value: selectedSeries[1] || 'Right Axis', angle: 90, position: 'insideRight' }} />}
-                <RechartsTooltip formatter={(value, name, props) => {
-                  const axisId = props.dataKey === selectedSeries[0] ? 'left' : 'right';
-                  return [`${value} (${axisId} axis)`, name];
-                }} contentStyle={{
-                  backgroundColor: theme.palette.background.paper,
-                  color: theme.palette.text.primary,
-                  border: `1px solid ${theme.palette.divider}`,
-                  borderRadius: '4px',
-                  boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
-                }} labelStyle={{ color: theme.palette.text.primary, fontWeight: 'bold' }} itemStyle={{ color: theme.palette.text.secondary }} />
+                <CartesianGrid stroke={isDarkMode ? "#616161" : "#CCCCCC"} strokeDasharray="3 3" />
+                <XAxis
+                  dataKey="snapshot_ccyymm"
+                  name="Time"
+                  tick={{ fill: isDarkMode ? "#E0E0E0" : "#000000" }}
+                  stroke={isDarkMode ? "#E0E0E0" : "#000000"}
+                />
+                <YAxis
+                  yAxisId="left"
+                  label={{
+                    value: selectedSeries[0] || 'Left Axis',
+                    angle: -90,
+                    position: 'insideLeft',
+                    fill: isDarkMode ? "#E0E0E0" : "#000000",
+                  }}
+                  stroke={isDarkMode ? "#E0E0E0" : "#000000"}
+                  tick={{ fill: isDarkMode ? "#E0E0E0" : "#000000" }}
+                />
+                {selectedSeries.length > 1 && (
+                  <YAxis
+                    yAxisId="right"
+                    orientation="right"
+                    label={{
+                      value: selectedSeries[1] || 'Right Axis',
+                      angle: 90,
+                      position: 'insideRight',
+                      fill: isDarkMode ? "#E0E0E0" : "#000000",
+                    }}
+                    stroke={isDarkMode ? "#E0E0E0" : "#000000"}
+                    tick={{ fill: isDarkMode ? "#E0E0E0" : "#000000" }}
+                  />
+                )}
+                <RechartsTooltip
+                  formatter={(value, name, props) => {
+                    const axisId = props.dataKey === selectedSeries[0] ? 'left' : 'right';
+                    return [`${Number(value).toFixed(4)} (${axisId} axis)`, name];
+                  }}
+                  contentStyle={{
+                    backgroundColor: isDarkMode ? theme.palette.background.paper : 'white',
+                    color: isDarkMode ? theme.palette.text.primary : 'black',
+                    border: `1px solid ${isDarkMode ? "#616161" : "#CCCCCC"}`,
+                    fontSize: '14px',
+                  }}
+                  labelStyle={{ color: isDarkMode ? theme.palette.text.primary : 'black', fontWeight: 'bold' }}
+                  itemStyle={{ color: isDarkMode ? theme.palette.text.secondary : 'black' }}
+                />
                 <Legend verticalAlign="bottom" height={36} layout="horizontal" align="center" wrapperStyle={{ bottom: -20, left: 0, right: 0 }} />
                 {selectedSeries.map((series, index) => (
-                  <Line key={series} type="monotone" dataKey={series} yAxisId={index === 0 ? 'left' : 'right'} stroke={CHART_COLORS[index % CHART_COLORS.length]} dot={{ strokeWidth: 2, r: 5 }} />
+                  <Line
+                    key={series}
+                    type="monotone"
+                    dataKey={series}
+                    yAxisId={index === 0 ? 'left' : 'right'}
+                    stroke={CHART_COLORS[index % CHART_COLORS.length]}
+                    dot={{ strokeWidth: 2, r: 5 }}
+                    strokeWidth={2}
+                  />
                 ))}
               </LineChart>
             </ResponsiveContainer>
@@ -847,34 +1204,42 @@ const MacroModel: React.FC = () => {
   }, []);
 
   return (
-      <Paper elevation={1} sx={{ width: '100%', minHeight: '80vh', padding: '16px', border: '1px solid rgba(0, 0, 0, 0.12)', boxShadow: 3, borderRadius: 4 }}>
-        <Typography variant="h5" gutterBottom sx={{ mb: 2, pb: 1, borderBottom: '1px solid rgba(0, 0, 0, 0.12)' }}>
-          Macro Model Analysis Results
-        </Typography>
-        <Tabs value={activeTab} onChange={(_, val) => setActiveTab(val)} variant="fullWidth" sx={{ borderBottom: 1, borderColor: 'divider', mb: 2 }}>
-          <Tab value="summary" label="Summary" icon={<SummarizeIcon />} iconPosition="start" />
-          <Tab value="model_performance" label="Model Performance" icon={<AssessmentIcon />} iconPosition="start" />
-          <Tab value="stationarity" label="Stationarity Tests" icon={<TimelineIcon />} iconPosition="start" />
-        </Tabs>
-        {isLoading ? (
-          <Grid container justifyContent="center"><CircularProgress /></Grid>
-        ) : error ? (
-          <Typography color="error">{error}</Typography>
-        ) : results ? (
-          <Grid item xs={12}>
-            {activeTab === 'summary' && <SummaryTab results={results} thresholds={thresholds} theme={theme} />}
-            {activeTab === 'model_performance' && (
-              <Grid container spacing={3}>
-                <Grid item xs={13}><NormalityTestSection results={results} theme={theme} /></Grid>
-                <Grid item xs={13}><AutocorrelationTestSection results={results} theme={theme} /></Grid>
-                <Grid item xs={12}><HeteroscedasticityTestSection results={results} theme={theme} /></Grid>
-                <Grid item xs={12}><ModelPerformanceSection results={results} thresholds={thresholds} theme={theme} /></Grid>
-              </Grid>
-            )}
-            {activeTab === 'stationarity' && <StationarityTab results={results} thresholds={thresholds} selectedSeries={selectedSeries} setSelectedSeries={setSelectedSeries} seriesOptions={seriesOptions} />}
-          </Grid>
-        ) : null}
-      </Paper>
+    <Paper elevation={1} sx={{ width: '100%', minHeight: '80vh', padding: '16px', border: '1px solid rgba(0, 0, 0, 0.12)', boxShadow: 3, borderRadius: 4 }}>
+      <Typography variant="h5" gutterBottom sx={{ mb: 2, pb: 1, borderBottom: '1px solid rgba(0, 0, 0, 0.12)' }}>
+        Macro Model Analysis Results
+      </Typography>
+      <Tabs value={activeTab} onChange={(_, val) => setActiveTab(val)} variant="fullWidth" sx={{ borderBottom: 1, borderColor: 'divider', mb: 2 }}>
+        <Tab value="summary" label="Summary" icon={<SummarizeIcon />} iconPosition="start" />
+        <Tab value="model_performance" label="Model Performance" icon={<AssessmentIcon />} iconPosition="start" />
+        <Tab value="stationarity" label="Stationarity Tests" icon={<TimelineIcon />} iconPosition="start" />
+      </Tabs>
+      {isLoading ? (
+        <Grid container justifyContent="center"><CircularProgress /></Grid>
+      ) : error ? (
+        <Typography color="error">{error}</Typography>
+      ) : results ? (
+        <Grid item xs={12}>
+          {activeTab === 'summary' && <SummaryTab results={results} thresholds={thresholds} theme={theme} />}
+          {activeTab === 'model_performance' && (
+            <Grid container spacing={3}>
+              <Grid item xs={12}><NormalityTestSection results={results} theme={theme} /></Grid>
+              <Grid item xs={12}><AutocorrelationTestSection results={results} theme={theme} /></Grid>
+              <Grid item xs={12}><HeteroscedasticityTestSection results={results} theme={theme} /></Grid>
+              <Grid item xs={12}><ModelPerformanceSection results={results} thresholds={thresholds} theme={theme} /></Grid>
+            </Grid>
+          )}
+          {activeTab === 'stationarity' && (
+            <StationarityTab
+              results={results}
+              thresholds={thresholds}
+              selectedSeries={selectedSeries}
+              setSelectedSeries={setSelectedSeries}
+              seriesOptions={seriesOptions}
+            />
+          )}
+        </Grid>
+      ) : null}
+    </Paper>
   );
 };
 

@@ -3,7 +3,7 @@ import {
   Box, FormControl, Grid, InputLabel, MenuItem, Select, Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
   Typography, Paper,
 } from '@mui/material';
-import { ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
+import { ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer } from 'recharts';
 import { useTheme } from '@mui/material/styles';
 import { SelectChangeEvent } from '@mui/material/Select';
 import { api } from '../utils/api';
@@ -43,25 +43,6 @@ interface Thresholds {
 }
 
 // === Utility Components ===
-const MetricBox: React.FC<{ metric: PerformanceMetric }> = ({ metric }) => {
-  const isPassing = metric.status === 'Pass';
-  return (
-    <Grid item xs={12} md={6}>
-      <Paper sx={{ p: 2, backgroundColor: isPassing ? 'success.light' : 'error.light', color: 'white', textAlign: 'center' }}>
-        <Typography variant="h5" sx={{ fontWeight: 'bold' }}>
-          {metric.metric}
-          <Typography component="span" variant="body1" sx={{ display: 'block', mt: 1, fontWeight: 'normal' }}>
-            {metric.value.toFixed(4)} (Threshold: {metric.threshold.toFixed(4)})
-          </Typography>
-          <Typography component="span" variant="body1" sx={{ display: 'block', mt: 0, fontWeight: 'bold' }}>
-            {isPassing ? 'PASS' : 'FAIL'}
-          </Typography>
-        </Typography>
-      </Paper>
-    </Grid>
-  );
-};
-
 const DecileTable: React.FC<{ data: DecileData[]; totalCount: number; isDarkMode: boolean }> = ({ data, totalCount, isDarkMode }) => (
   <TableContainer component={Paper} sx={{ backgroundColor: isDarkMode ? 'background.default' : undefined, boxShadow: isDarkMode ? 'none' : undefined }}>
     <Table size="small">
@@ -262,18 +243,93 @@ const LGDModel: React.FC = () => {
         </Grid>
         {results && (
           <Box sx={{ flex: 1, overflow: 'auto', width: '100%', mt: 2 }}>
-            <Grid container spacing={2} sx={{ mb: 2 }}>
-              {performanceMetrics.map((metric, i) => <MetricBox key={i} metric={metric} />)}
-            </Grid>
+            <Box sx={{ mb: 3 }}>
+              <TableContainer component={Paper}>
+                <Table>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>Metrics</TableCell>
+                      <TableCell align="right">Value</TableCell>
+                      <TableCell align="right">Threshold</TableCell>
+                      <TableCell align="right">Result</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {performanceMetrics.map((metric, index) => (
+                      <TableRow key={index}>
+                        <TableCell>{metric.metric}</TableCell>
+                        <TableCell align="right">{metric.value.toFixed(4)}</TableCell>
+                        <TableCell align="right">{metric.threshold.toFixed(4)}</TableCell>
+                        <TableCell
+                          align="right"
+                          sx={{
+                            color: metric.status === "Pass" ? "#3cd644" : "#f54141",
+                            fontWeight: "bold",
+                          }}
+                        >
+                          {metric.status === "Pass" ? "PASS" : "FAIL"}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </Box>
             <Box sx={{ width: '100%', height: '50vh', minHeight: 400, mb: 2, px: 0 }}>
               <ResponsiveContainer width="100%" height="100%">
                 <ScatterChart margin={{ top: 20, right: 40, bottom: 40, left: 60 }}>
-                  <CartesianGrid />
-                  <XAxis type="number" dataKey="actual" name="Actual LGD" tickFormatter={value => value.toFixed(0)} label={{ value: 'Actual LGD', position: 'bottom', offset: 20 }} />
-                  <YAxis type="number" dataKey="predicted" name="Predicted LGD" tickFormatter={value => value.toFixed(0)} label={{ value: 'Predicted LGD', angle: -90, position: 'insideLeft', offset: -30, style: { textAnchor: 'middle' } }} />
-                  <RechartsTooltip contentStyle={{ backgroundColor: isDarkMode ? theme.palette.background.paper : 'white', color: isDarkMode ? theme.palette.text.primary : 'black' }} />
-                  <Scatter name={selectedModelName || 'Default Model'} data={comparisonData} fill="#8884d8" />
-                  <ReferenceLine x={0} y={0} stroke="red" strokeDasharray="3 3" />
+                  <CartesianGrid
+                    stroke={isDarkMode ? "#616161" : "#CCCCCC"} // Lighter grey for dark mode, standard grey for light mode
+                    strokeDasharray="3 3"
+                  />
+                  <XAxis
+                    type="number"
+                    dataKey="actual"
+                    name="Actual LGD"
+                    tickFormatter={(value) => value.toFixed(0)}
+                    label={{
+                      value: 'Actual LGD',
+                      position: 'bottom',
+                      offset: 20,
+                      fill: isDarkMode ? "#E0E0E0" : "#000000", // Light grey for dark mode, black for light mode
+                    }}
+                    stroke={isDarkMode ? "#E0E0E0" : "#000000"} // Axis line color
+                    tick={{ fill: isDarkMode ? "#E0E0E0" : "#000000" }} // Tick mark color
+                  />
+                  <YAxis
+                    type="number"
+                    dataKey="predicted"
+                    name="Predicted LGD"
+                    tickFormatter={(value) => value.toFixed(0)}
+                    label={{
+                      value: 'Predicted LGD',
+                      angle: -90,
+                      position: 'insideLeft',
+                      offset: -30,
+                      style: { textAnchor: 'middle' },
+                      fill: isDarkMode ? "#E0E0E0" : "#000000", // Light grey for dark mode, black for light mode
+                    }}
+                    stroke={isDarkMode ? "#E0E0E0" : "#000000"} // Axis line color
+                    tick={{ fill: isDarkMode ? "#E0E0E0" : "#000000" }} // Tick mark color
+                  />
+                  <RechartsTooltip
+                    contentStyle={{
+                      backgroundColor: isDarkMode ? theme.palette.background.paper : 'white',
+                      color: isDarkMode ? theme.palette.text.primary : 'black',
+                      border: `1px solid ${isDarkMode ? "#616161" : "#CCCCCC"}`,
+                      fontSize: '14px',
+                    }}
+                    labelStyle={{ color: isDarkMode ? theme.palette.text.primary : 'black', fontWeight: 'bold' }}
+                    itemStyle={{ color: isDarkMode ? theme.palette.text.secondary : 'black' }}
+                    formatter={(value: number) => value.toFixed(4)}
+                  />
+                  <Scatter
+                    name={selectedModelName || 'Default Model'}
+                    data={comparisonData}
+                    fill="#42A5F5" // Bright blue for scatter points
+                    stroke="#FFFFFF" // White outline for better contrast
+                    strokeWidth={1}
+                  />
                 </ScatterChart>
               </ResponsiveContainer>
             </Box>

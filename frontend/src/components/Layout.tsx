@@ -61,10 +61,10 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     palette: {
       mode: isDarkMode ? 'dark' : 'light',
       primary: {
-        main: '#FFC107', // EY Yellow
+        main: isDarkMode ? '#FFE600' : '#775C01', // EY Yellow
       },
       secondary: {
-        main: isDarkMode ? '#4CAF50' : '#8BC34A', // Green accent
+        main: isDarkMode ? '#4CAF50' : '#D5D5A5',
       },
       background: {
         default: isDarkMode ? '#2E2E38' : '#F5F5F5',
@@ -106,7 +106,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         styleOverrides: {
           root: {
             '&.Mui-selected': {
-              backgroundColor: isDarkMode ? '#FFC107' : '#FFF8E1',
+              backgroundColor: isDarkMode ? '#FFE600' : '#FFE600',
               color: isDarkMode ? '#1A1A24' : '#252525',
               '& .MuiListItemIcon-root': {
                 color: isDarkMode ? '#1A1A24' : '#252525',
@@ -230,7 +230,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 />
                 <path
                   d="M392.42 0 0 143.22 392.42 73.9V0Z"
-                  fill={'#FFC107'}
+                  fill={'#ffe600'}
                 />
                 <path
                   d="M3.43 401.26h158.8v-45.65H62.96v-32.75h71.78v-41.68H62.96v-32.76h79.41l-26.35-45.65H3.43v198.49Z"

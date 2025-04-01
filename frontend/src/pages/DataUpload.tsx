@@ -9,7 +9,7 @@ const UploadSection: React.FC<{
   file: File | undefined;
   onFileChange: (file: File) => void;
   onUpload: () => void;
-  type?: string; // Add type back as an optional prop
+  type?: string;
 }> = ({ title, file, onFileChange, onUpload }) => (
   <Box sx={{ mb: 4 }}>
     <Typography variant="h6" gutterBottom>{title}</Typography>
@@ -86,7 +86,7 @@ const DataUpload: React.FC = () => {
   ];
 
   return (
-    <Paper sx={{ p: 3, width: '100%', maxWidth: 'none', margin: 0, boxShadow: 3, borderRadius: 4 }}>
+    <Paper sx={{ p: 3, width: '100%', maxWidth: 'none', margin: 0, boxShadow: 3, borderRadius: 4}}>
       <Typography variant="h4" gutterBottom>Data Upload</Typography>
 
       {uploadStatus.success && (

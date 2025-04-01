@@ -24,16 +24,6 @@ interface MacroAnalysisResult {
   trend_analysis: Record<string, { mean: number; std: number; min: number; max: number; trend_slope: number }>;
 }
 
-interface RatingTransitionResult {
-  unique_ratings: number;
-  total_transitions: number;
-  stability_rate: number;
-  transition_matrix: Record<string, Record<string, number>>;
-  significant_migrations: Record<string, Record<string, number>>;
-  previousRatings: string[];
-  currentRatings: string[];
-}
-
 interface AnalysisParams {
   quarter?: string;
   portfolio?: string;

@@ -201,7 +201,7 @@ const Introduction: React.FC = () => {
             <List>
               <InfoItem
                 primary="Population Stability Index (PSI)"
-                secondary="Population stability index is used to measure the stability of the model by quantifying and measuring the difference in the distance (distributional shift) between the two distributions: current and baseline. PSI is calculated using the below formula:\nPSI = Σ (% of Current - % of Base) × ln(% of Current / % of Base)"
+                secondary="Population stability index is used to measure the stability of the model by quantifying and measuring the difference in the distance (distributional shift) between the two distributions: current and baseline. PSI is calculated using the below formula: PSI = Σ (% of Current - % of Base) × ln(% of Current / % of Base)"
               />
             </List>
           </Grid>
@@ -210,11 +210,11 @@ const Introduction: React.FC = () => {
             <List>
               <InfoItem
                 primary="Information Value (IV)"
-                secondary="Information value corresponding to a variable is used to assess the predictive power. It is calculated as:\nIV = Σ ( % of Good - % of Bad ) × ln( % of Good / % of Bad )"
+                secondary="Information value corresponding to a variable is used to assess the predictive power. It is calculated as: IV = Σ ( % of Good - % of Bad ) × ln( % of Good / % of Bad )"
               />
               <InfoItem
                 primary="Character Stability Index (CSI)"
-                secondary="Character stability index is used to measure the stability of the variable by quantifying and measuring the difference in the distance (distributional shift) between the two distributions: current and baseline. CSI is calculated using the below formula:\nCSI = Σ (% of Current - % of Base) × ln(% of Current / % of Base)"
+                secondary="Character stability index is used to measure the stability of the variable by quantifying and measuring the difference in the distance (distributional shift) between the two distributions: current and baseline. CSI is calculated using the below formula: CSI = Σ (% of Current - % of Base) × ln(% of Current / % of Base)"
               />
             </List>
           </Grid>

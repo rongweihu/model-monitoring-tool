@@ -176,11 +176,38 @@ const PDModel: React.FC = () => {
     // Sub-Components
     const DiscriminatoryPowerTab: React.FC = () => {
         if (!pdAnalysisResults) return <Typography color="error">No data available</Typography>;
-
+    
         const { discriminatory_power } = pdAnalysisResults;
         const giniCoefficient = discriminatory_power?.gini?.gini_coefficient ?? 0;
         const ksStatistic = discriminatory_power?.ks_test?.ks_statistic ?? 0;
-
+    
+        // Data for the table
+        const metricData = [
+            {
+                metric: "Gini Coefficient",
+                value: giniCoefficient,
+                threshold: giniThreshold,
+                result: giniCoefficient >= giniThreshold ? "PASS" : "FAIL",
+            },
+            {
+                metric: "KS Statistic",
+                value: ksStatistic,
+                threshold: ksThreshold,
+                result: ksStatistic >= ksThreshold ? "PASS" : "FAIL",
+            },
+        ];
+    
+        // Define colors for dark theme visibility
+        const lineColors = {
+            modelPerformance: "#00C4B4", // Bright teal for Model Performance (Gini)
+            randomModel: "#FFCA28", // Bright yellow for Random Model (Gini)
+            goodsCDF: "#42A5F5", // Bright blue for Goods CDF (KS)
+            badsCDF: "#FF7043", // Bright orange for Bads CDF (KS)
+        };
+    
+        const textColor = isDarkMode ? "#E0E0E0" : "#000000"; // Light grey for dark mode, black for light mode
+        const gridColor = isDarkMode ? "#616161" : "#CCCCCC"; // Lighter grey for dark mode grid
+    
         return (
             <Box>
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
@@ -190,39 +217,198 @@ const PDModel: React.FC = () => {
                         <MenuItem value="TTCReportingRating">Credit Rating</MenuItem>
                     </Select>
                 </Box>
+                {/* Table for Gini Coefficient and KS Statistic */}
+                <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+                <Grid container spacing={2} justifyContent="center">
+                    {/* Gini Coefficient Table */}
+                    <Grid item xs={12} sm={6}>
+                        <TableContainer
+                            component={Paper}
+                            sx={{
+                                width: '100%',
+                            }}
+                        >
+                            <Table>
+                                <TableHead>
+                                    <TableRow>
+                                        <TableCell>Metrics</TableCell>
+                                        <TableCell align="right">Value</TableCell>
+                                        <TableCell align="right">Threshold</TableCell>
+                                        <TableCell align="right">Result</TableCell>
+                                    </TableRow>
+                                </TableHead>
+                                <TableBody>
+                                    <TableRow>
+                                        <TableCell>{metricData[0].metric}</TableCell>
+                                        <TableCell align="right">{metricData[0].value.toFixed(4)}</TableCell>
+                                        <TableCell align="right">{metricData[0].threshold.toFixed(4)}</TableCell>
+                                        <TableCell
+                                            align="right"
+                                            sx={{
+                                                color: metricData[0].result === "PASS" ? '#3cd644' : '#f54141',
+                                                fontWeight: "bold",
+                                            }}
+                                        >
+                                            {metricData[0].result}
+                                        </TableCell>
+                                    </TableRow>
+                                </TableBody>
+                            </Table>
+                        </TableContainer>
+                    </Grid>
+                    {/* KS Statistic Table */}
+                    <Grid item xs={12} sm={6}>
+                        <TableContainer
+                            component={Paper}
+                            sx={{
+                                width: '100%', 
+                            }}
+                        >
+                            <Table>
+                                <TableHead>
+                                    <TableRow>
+                                        <TableCell>Metrics</TableCell>
+                                        <TableCell align="right">Value</TableCell>
+                                        <TableCell align="right">Threshold</TableCell>
+                                        <TableCell align="right">Result</TableCell>
+                                    </TableRow>
+                                </TableHead>
+                                <TableBody>
+                                    <TableRow>
+                                        <TableCell>{metricData[1].metric}</TableCell>
+                                        <TableCell align="right">{metricData[1].value.toFixed(4)}</TableCell>
+                                        <TableCell align="right">{metricData[1].threshold.toFixed(4)}</TableCell>
+                                        <TableCell
+                                            align="right"
+                                            sx={{
+                                                color: metricData[1].result === "PASS" ? '#3cd644' : '#f54141',
+                                                fontWeight: "bold",
+                                            }}
+                                        >
+                                            {metricData[1].result}
+                                        </TableCell>
+                                    </TableRow>
+                                </TableBody>
+                            </Table>
+                        </TableContainer>
+                    </Grid>
+                </Grid>
+            </Box>
                 <Grid container spacing={2}>
-                    <MetricBox value={giniCoefficient} threshold={giniThreshold} label="Gini Coefficient" />
-                    <MetricBox value={ksStatistic} threshold={ksThreshold} label="KS Statistic" />
                     <Grid item xs={12} md={6}>
                         <Typography variant="h6">Gini Coefficient</Typography>
-                        <ResponsiveContainer width="100%" height={300}>
-                            <LineChart data={performanceData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-                                <CartesianGrid strokeDasharray="3 3" />
-                                <XAxis type="number" dataKey="x" label={{ value: 'Proportion of Goods', position: 'insideBottom', offset: -5 }} />
-                                <YAxis label={{ value: 'Proportion of Bads', angle: -90, position: 'insideLeft' }} />
-                                <Legend />
-                                <Line type="monotone" dataKey="y" stroke="#8884d8" dot={false} name="Model Performance" />
-                                <Line data={randomModelData} type="monotone" dataKey="y" stroke="#82ca9d" strokeDasharray="5 5" dot={false} name="Random Model" />
-                                <RechartsTooltip contentStyle={{ backgroundColor: isDarkMode ? theme.palette.background.paper : 'white', color: isDarkMode ? theme.palette.text.primary : 'black' }} />
+                        <ResponsiveContainer width="100%" height={400}>
+                            <LineChart data={performanceData} margin={{ top: 5, right: 30, left: 20, bottom: 20 }}>
+                                <CartesianGrid stroke={gridColor} strokeDasharray="3 3" />
+                                <XAxis
+                                    type="number"
+                                    dataKey="x"
+                                    label={{ value: 'Proportion of Goods', position: 'insideBottom', offset: -10, fill: textColor }}
+                                    stroke={textColor}
+                                    tick={{ fill: textColor }}
+                                />
+                                <YAxis
+                                    label={{ value: 'Proportion of Bads', angle: -90, dy: 70, position: 'insideLeft', fill: textColor }}
+                                    stroke={textColor}
+                                    tick={{ fill: textColor }}
+                                />
+                                <Legend
+                                    layout="horizontal"
+                                    verticalAlign="top"
+                                    align="left"
+                                    wrapperStyle={{
+                                    color: textColor,
+                                    paddingLeft: 50,
+                                    paddingTop: -15,
+                                }}
+                            />
+                                <Line
+                                    type="monotone"
+                                    dataKey="y"
+                                    stroke={lineColors.modelPerformance}
+                                    strokeWidth={2}
+                                    dot={false}
+                                    name="Model Performance"
+                                />
+                                <Line
+                                    data={randomModelData}
+                                    type="monotone"
+                                    dataKey="y"
+                                    stroke={lineColors.randomModel}
+                                    strokeWidth={2}
+                                    strokeDasharray="5 5"
+                                    dot={false}
+                                    name="Random Model"
+                                />
+                                <RechartsTooltip
+                                    contentStyle={{
+                                        backgroundColor: isDarkMode ? theme.palette.background.paper : 'white',
+                                        color: isDarkMode ? theme.palette.text.primary : 'black',
+                                        border: `1px solid ${gridColor}`,
+                                    }}
+                                />
                             </LineChart>
                         </ResponsiveContainer>
-                        <Typography variant="body2">Gini Coefficient: {giniCoefficient.toFixed(4)}</Typography>
                     </Grid>
                     <Grid item xs={12} md={6}>
                         <Typography variant="h6">KS Test</Typography>
-                        <ResponsiveContainer width="100%" height={300}>
-                            <LineChart data={ksCurveData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-                                <CartesianGrid strokeDasharray="3 3" />
-                                <XAxis type="number" dataKey="x" label={{ value: 'Proportion of Population', position: 'insideBottom', offset: -5 }} />
-                                <YAxis label={{ value: 'Cumulative Distribution', angle: -90, position: 'insideLeft' }} />
-                                <Legend verticalAlign="top" height={36} align="right" />
-                                <Line type="monotone" dataKey="good_cdf" stroke="#8884d8" name="Goods CDF" dot={false} />
-                                <Line type="monotone" dataKey="bad_cdf" stroke="#82ca9d" name="Bads CDF" dot={false} />
-                                <Scatter data={[ksPoint]} fill="red" shape="cross" strokeWidth={3} name="KS Point" />
-                                <RechartsTooltip contentStyle={{ backgroundColor: isDarkMode ? theme.palette.background.paper : 'white', color: isDarkMode ? theme.palette.text.primary : 'black' }} />
+                        <ResponsiveContainer width="100%" height={400}>
+                            <LineChart data={ksCurveData} margin={{ top: 5, right: 30, left: 20, bottom: 30 }}>
+                                <CartesianGrid stroke={gridColor} strokeDasharray="3 3" />
+                                <XAxis
+                                    type="number"
+                                    dataKey="x"
+                                    label={{ value: 'Proportion of Population', position: 'insideBottom', offset: -10, fill: textColor }}
+                                    stroke={textColor}
+                                    tick={{ fill: textColor }}
+                                />
+                                <YAxis
+                                    label={{ value: 'Cumulative Distribution', angle: -90, dy: 70, position: 'insideLeft', fill: textColor }}
+                                    stroke={textColor}
+                                    tick={{ fill: textColor }}
+                                />
+                                <Legend
+                                    layout="horizontal"
+                                    verticalAlign="top"
+                                    align="right"
+                                    wrapperStyle={{
+                                    color: textColor,
+                                    paddingLeft: 50, // Adjust to avoid overlap with Y-axis
+                                    paddingTop: 5, // Position inside the plot
+                                }}
+                            />
+                                <Line
+                                    type="monotone"
+                                    dataKey="good_cdf"
+                                    stroke={lineColors.goodsCDF}
+                                    strokeWidth={2}
+                                    name="Goods CDF"
+                                    dot={false}
+                                />
+                                <Line
+                                    type="monotone"
+                                    dataKey="bad_cdf"
+                                    stroke={lineColors.badsCDF}
+                                    strokeWidth={2}
+                                    name="Bads CDF"
+                                    dot={false}
+                                />
+                                <Scatter
+                                    data={[ksPoint]}
+                                    fill="#F44336"
+                                    shape="cross"
+                                    strokeWidth={3}
+                                    name="KS Point"
+                                />
+                                <RechartsTooltip
+                                    contentStyle={{
+                                        backgroundColor: isDarkMode ? theme.palette.background.paper : 'white',
+                                        color: isDarkMode ? theme.palette.text.primary : 'black',
+                                        border: `1px solid ${gridColor}`,
+                                    }}
+                                />
                             </LineChart>
                         </ResponsiveContainer>
-                        <Typography variant="body2">KS Statistic: {ksStatistic.toFixed(4)}</Typography>
                     </Grid>
                 </Grid>
             </Box>
@@ -310,14 +496,14 @@ const PDModel: React.FC = () => {
                                 </TableHead>
                                 <TableBody>
                                     {ratingBinomialTests.map((test, index) => (
-                                        <TableRow key={test.rating || index} sx={{ backgroundColor: test.test_result === 'PASS' ? 'rgba(0, 255, 0, 0.1)' : 'rgba(255, 0, 0, 0.1)' }}>
+                                        <TableRow key={test.rating || index}>
                                             <TableCell>{test.rating || 'N/A'}</TableCell>
                                             <TableCell align="right">{test.total_samples ?? 'N/A'}</TableCell>
                                             <TableCell align="right">{test.observed_defaults ?? 'N/A'}</TableCell>
                                             <TableCell align="right">{typeof test.observed_defaults === 'number' && typeof test.total_samples === 'number' ? `${((test.observed_defaults / test.total_samples) * 100).toFixed(2)}%` : 'N/A'}</TableCell>
                                             <TableCell align="right">{typeof test.expected_default_prob === 'number' ? `${(test.expected_default_prob * 100).toFixed(2)}%` : 'N/A'}</TableCell>
                                             <TableCell align="right">{typeof test.p_value === 'number' ? test.p_value.toFixed(4) : 'N/A'}</TableCell>
-                                            <TableCell align="right">{test.test_result || 'N/A'}</TableCell>
+                                            <TableCell align="right" sx={{color: test.test_result === "PASS" ? '#3cd644' : '#f54141',fontWeight: "bold"}}>{test.test_result || 'N/A'}</TableCell>
                                         </TableRow>
                                     ))}
                                 </TableBody>
@@ -344,7 +530,7 @@ const PDModel: React.FC = () => {
                                     {typeof hosmer_lemeshow.p_value === 'number' && (
                                         <TableRow>
                                             <TableCell>Test Result (alpha = 0.05)</TableCell>
-                                            <TableCell sx={{ color: hosmer_lemeshow.p_value >= 0.05 ? '#2e7d32' : '#d32f2f' }}>{hosmer_lemeshow.p_value >= 0.05 ? 'PASS' : 'FAIL'}</TableCell>
+                                            <TableCell sx={{ color: hosmer_lemeshow.p_value >= 0.05 ? '#3cd644' : '#f54141', fontWeight: "bold"}}>{hosmer_lemeshow.p_value >= 0.05 ? 'PASS' : 'FAIL'}</TableCell>
                                         </TableRow>
                                     )}
                                 </TableBody>
@@ -439,8 +625,7 @@ const PDModel: React.FC = () => {
                     <YAxis label={{ value: 'Weight of Evidence (WOE)', angle: -90, position: 'insideLeft' }} />
                     <RechartsTooltip 
                         contentStyle={{ backgroundColor: isDarkMode ? theme.palette.background.paper : 'white', color: isDarkMode ? theme.palette.text.primary : 'black' }}
-                        formatter={(value, name) => [value, name]}
-                        labelFormatter={(label) => typeof label === 'number' ? label.toFixed(2) : label}
+                        formatter={(value: number) => value.toFixed(4)}
                     />
                     <Line type="monotone" dataKey="y" stroke="#8884d8" strokeWidth={2} dot={{ r: 5 }} activeDot={{ r: 8 }} />
                 </LineChart>
