@@ -70,7 +70,7 @@ interface MacroModelResults {
     trend_line?: { x: number[]; y: number[]; equation: { slope: number; intercept: number } };
   };
   stationarity_results: { [key: string]: StationarityResult };
-  time_series_data: Array<{ snapshot_ccyymm: string; [key: string]: number | string }>;
+  time_series_data: Array<{ snapshot_ccyymm: string;[key: string]: number | string }>;
 }
 
 // === Constants ===
@@ -83,7 +83,7 @@ const DEFAULT_THRESHOLDS: MacroModelThresholds = {
   stationarity_threshold: 0.05,
 };
 
-const CHART_COLORS = ['#42A5F5', '#3cd644', '#FFCA28']; // Updated to brighter colors: Bright Blue, Green, Bright Yellow
+const CHART_COLORS = ['#FFE600', '#42A5F5', '#3cd644', '#FFCA28']; // Updated to brighter colors: Bright Blue, Green, Bright Yellow
 
 // === Utility Functions ===
 const safeToFixed = (value: number | undefined | null, decimals: number = 4): string =>
@@ -124,31 +124,6 @@ const TestCard: React.FC<{ title: string | JSX.Element; children: React.ReactNod
   </Paper>
 );
 
-const TestResultChip: React.FC<{ test: string; result: any }> = ({ test, result }) => {
-  let status: 'success' | 'error' = 'error';
-  let label = 'Fail';
-
-  switch (test) {
-    case 'Normality Test':
-      status = result.is_normal ? 'success' : 'error';
-      label = result.is_normal ? 'Pass' : 'Fail';
-      break;
-    case 'Autocorrelation Test':
-      status = result.status.toLowerCase().includes('no autocorrelation') ? 'success' : 'error';
-      label = status === 'success' ? 'Pass' : 'Fail';
-      break;
-    case 'Heteroscedasticity Test':
-      status = result.is_homoscedastic ? 'success' : 'error';
-      label = result.is_homoscedastic ? 'Pass' : 'Fail';
-      break;
-    case 'Stationarity Test':
-      status = result.is_stationary ? 'success' : 'error';
-      label = result.is_stationary ? 'Pass' : 'Fail';
-      break;
-  }
-
-  return <Chip label={label} color={status} variant="outlined" />;
-};
 
 // === Sub-Components ===
 const NormalityTestSection: React.FC<{ results: MacroModelResults; theme: any }> = ({ results, theme }) => {
@@ -182,9 +157,9 @@ const NormalityTestSection: React.FC<{ results: MacroModelResults; theme: any }>
                     <strong>Anderson-Darling Normality Test:</strong>
                     <br /><br />
                     <ul>
-                    <li>Statistics &lt; critical value at certain significance level: Fail to reject null hypothesis</li>
-                    <li>Suggests the data is likely normally distributed</li>
-                    <li>Indicates residuals follow a normal distribution</li>
+                      <li>Statistics &lt; critical value at certain significance level: Fail to reject null hypothesis</li>
+                      <li>Suggests the data is likely normally distributed</li>
+                      <li>Indicates residuals follow a normal distribution</li>
 
                     </ul>
                     <br />
@@ -251,6 +226,7 @@ const NormalityTestSection: React.FC<{ results: MacroModelResults; theme: any }>
                               }}
                               labelStyle={{ color: isDarkMode ? theme.palette.text.primary : 'black', fontWeight: 'bold' }}
                               itemStyle={{ color: isDarkMode ? theme.palette.text.secondary : 'black' }}
+                              formatter={(value: number) => value.toFixed(4)}
                             />
                             <Bar
                               dataKey="histogram"
@@ -313,6 +289,8 @@ const NormalityTestSection: React.FC<{ results: MacroModelResults; theme: any }>
                               }}
                               labelStyle={{ color: isDarkMode ? theme.palette.text.primary : 'black', fontWeight: 'bold' }}
                               itemStyle={{ color: isDarkMode ? theme.palette.text.secondary : 'black' }}
+                              formatter={(value: number) => value.toFixed(4)}
+                              labelFormatter={(value: number) => value.toFixed(4)}
                             />
                             <Line
                               name="Reference Line"
@@ -376,9 +354,9 @@ const AutocorrelationTestSection: React.FC<{ results: MacroModelResults; theme: 
                     <strong>Durbin-Watson Statistic Interpretation:</strong>
                     <br /><br />
                     <ul>
-                    <li>DW &lt; 1.5: Strong evidence of positive autocorrelation in model error</li>
-                    <li>1.5 ≤ DW ≤ 2.5: Little to no autocorrelation in model error</li>
-                    <li>DW &gt; 2.5: Strong evidence of negative autocorrelation in model error</li>
+                      <li>DW &lt; 1.5: Strong evidence of positive autocorrelation in model error</li>
+                      <li>1.5 ≤ DW ≤ 2.5: Little to no autocorrelation in model error</li>
+                      <li>DW &gt; 2.5: Strong evidence of negative autocorrelation in model error</li>
 
                     </ul>
                     <br />
@@ -462,6 +440,7 @@ const AutocorrelationTestSection: React.FC<{ results: MacroModelResults; theme: 
                                 }}
                                 labelStyle={{ color: isDarkMode ? theme.palette.text.primary : 'black', fontWeight: 'bold' }}
                                 itemStyle={{ color: isDarkMode ? theme.palette.text.secondary : 'black' }}
+                                formatter={(value: number) => value.toFixed(4)}
                               />
                               <Bar
                                 dataKey="acf"
@@ -538,6 +517,7 @@ const AutocorrelationTestSection: React.FC<{ results: MacroModelResults; theme: 
                                 }}
                                 labelStyle={{ color: isDarkMode ? theme.palette.text.primary : 'black', fontWeight: 'bold' }}
                                 itemStyle={{ color: isDarkMode ? theme.palette.text.secondary : 'black' }}
+                                formatter={(value: number) => value.toFixed(4)}
                               />
                               <Bar
                                 dataKey="pacf"
@@ -756,7 +736,7 @@ const ModelPerformanceSection: React.FC<{ results: MacroModelResults; thresholds
             </Typography>
             <Box sx={{ width: '100%', height: 400 }}>
               <ResponsiveContainer>
-                <ComposedChart width={500} height={400}>
+                <ComposedChart width={400} height={400} margin={{ top: 20, right: 40, bottom: 40, left: 60 }}>
                   <CartesianGrid stroke={isDarkMode ? "#616161" : "#CCCCCC"} strokeDasharray="3 3" />
                   <XAxis
                     type="number"
@@ -765,7 +745,7 @@ const ModelPerformanceSection: React.FC<{ results: MacroModelResults; thresholds
                     label={{
                       value: 'Actual Default Rate',
                       position: 'insideBottom',
-                      offset: -5,
+                      offset: -15,
                       fill: isDarkMode ? "#E0E0E0" : "#000000",
                     }}
                     stroke={isDarkMode ? "#E0E0E0" : "#000000"}
@@ -778,6 +758,8 @@ const ModelPerformanceSection: React.FC<{ results: MacroModelResults; thresholds
                     label={{
                       value: 'Predicted Probability of Default',
                       angle: -90,
+                      offset: -20,
+                      dy: 120,
                       position: 'insideLeft',
                       fill: isDarkMode ? "#E0E0E0" : "#000000",
                     }}
@@ -866,6 +848,7 @@ const SummaryTab: React.FC<{ results: MacroModelResults; thresholds: MacroModelT
     acc[variable] = { status: nonStationaryCount >= 2 ? 'Fail' : 'Pass', interpretation: nonStationaryCount >= 2 ? 'Non-stationary' : 'Stationary' };
     return acc;
   }, {} as Record<string, { status: string; interpretation: string }>);
+  const headerColor = isDarkMode ? '#FFE600' : 'black';
 
   return (
     <Box>
@@ -874,37 +857,67 @@ const SummaryTab: React.FC<{ results: MacroModelResults; thresholds: MacroModelT
         <Table>
           <TableHead>
             <TableRow>
-              <TableCell><strong>Test</strong></TableCell>
-              <TableCell><strong>Result</strong></TableCell>
-              <TableCell><strong>Interpretation</strong></TableCell>
+              <TableCell sx={{ fontWeight: 'bold', color: headerColor }}><strong>Test</strong></TableCell>
+              <TableCell sx={{ fontWeight: 'bold', color: headerColor }}><strong>Interpretation</strong></TableCell>
+              <TableCell align="center" sx={{ fontWeight: 'bold', color: headerColor }}><strong>Result</strong></TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             <TableRow>
               <TableCell>Normality Test</TableCell>
-              <TableCell><TestResultChip test="Normality Test" result={{ is_normal: !normalityInterpretation.includes('not normally distributed') }} /></TableCell>
               <TableCell>{normalityInterpretation}</TableCell>
+              <TableCell
+                align="center"
+                sx={{
+                  backgroundColor: !normalityInterpretation.includes('not normally distributed') ? '#04a60c' : '#f54141',
+                  fontWeight: 'bold',
+                  color: 'white'
+                }}
+              >
+                {!normalityInterpretation.includes('not normally distributed') ? 'Pass' : 'Fail'}
+              </TableCell>
             </TableRow>
             <TableRow>
               <TableCell>Autocorrelation Test</TableCell>
-              <TableCell><TestResultChip test="Autocorrelation Test" result={{ status: autocorrelationInterpretation }} /></TableCell>
               <TableCell>{autocorrelationInterpretation}</TableCell>
+              <TableCell
+                align="center"
+                sx={{
+                  backgroundColor: autocorrelationInterpretation.toLowerCase().includes('no autocorrelation') ? '#04a60c' : '#f54141',
+                  fontWeight: 'bold',
+                  color: 'white'
+                }}
+              >
+                {autocorrelationInterpretation.toLowerCase().includes('no autocorrelation') ? 'Pass' : 'Fail'}
+              </TableCell>
             </TableRow>
             <TableRow>
               <TableCell>Heteroscedasticity Test</TableCell>
-              <TableCell><TestResultChip test="Heteroscedasticity Test" result={{ is_homoscedastic: results.heteroscedasticity_results['p-value'] > 0.05 }} /></TableCell>
               <TableCell>{results.heteroscedasticity_results['p-value'] > 0.05 ? 'No significant evidence of heteroscedasticity in model error' : 'Evidence of heteroscedasticity in model error'}</TableCell>
+              <TableCell
+                align="center"
+                sx={{
+                  backgroundColor: results.heteroscedasticity_results['p-value'] > 0.05 ? '#04a60c' : '#f54141',
+                  fontWeight: 'bold',
+                  color: 'white'
+                }}
+              >
+                {results.heteroscedasticity_results['p-value'] > 0.05 ? 'Pass' : 'Fail'}
+              </TableCell>
             </TableRow>
             <TableRow>
               <TableCell>Model Performance</TableCell>
-              <TableCell>
-                <Chip
-                  label={results.comparison_results['Adjusted R-squared'] >= thresholds.r_squared_threshold && results.comparison_results['RMSE'] < thresholds.rmse_threshold ? 'Pass' : 'Fail'}
-                  color={results.comparison_results['Adjusted R-squared'] >= thresholds.r_squared_threshold && results.comparison_results['RMSE'] < thresholds.rmse_threshold ? 'success' : 'error'}
-                  variant="outlined"
-                />
-              </TableCell>
               <TableCell>{`R-squared: ${safeToFixed(results.comparison_results['Adjusted R-squared'])} | RMSE: ${safeToFixed(results.comparison_results['RMSE'])}`}</TableCell>
+              <TableCell
+                align="center"
+                sx={{
+                  backgroundColor: (results.comparison_results['Adjusted R-squared'] >= thresholds.r_squared_threshold && results.comparison_results['RMSE'] < thresholds.rmse_threshold) ? '#04a60c' : '#f54141',
+                  fontWeight: 'bold',
+                  color: 'white'
+                }}
+              >
+                {results.comparison_results['Adjusted R-squared'] >= thresholds.r_squared_threshold && results.comparison_results['RMSE'] < thresholds.rmse_threshold ? 'Pass' : 'Fail'}
+              </TableCell>
             </TableRow>
           </TableBody>
         </Table>
@@ -919,7 +932,7 @@ const SummaryTab: React.FC<{ results: MacroModelResults; thresholds: MacroModelT
                 'Predicted PD': item.pred_dr,
                 'Actual Default Rate': item.Defaultrate,
               }))}
-              margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+              margin={{ top: 20, right: 60, bottom: 40, left: 60 }}
             >
               <CartesianGrid stroke={isDarkMode ? "#616161" : "#CCCCCC"} strokeDasharray="3 3" />
               <XAxis
@@ -959,7 +972,7 @@ const SummaryTab: React.FC<{ results: MacroModelResults; thresholds: MacroModelT
                 yAxisId="left"
                 type="monotone"
                 dataKey="Predicted PD"
-                stroke="#42A5F5" // Bright blue
+                stroke="#42A5F5"
                 dot={{ r: 3 }}
                 activeDot={{ r: 5 }}
                 strokeWidth={2}
@@ -968,7 +981,7 @@ const SummaryTab: React.FC<{ results: MacroModelResults; thresholds: MacroModelT
                 yAxisId="left"
                 type="monotone"
                 dataKey="Actual Default Rate"
-                stroke="#82ca9d" // Green (already visible)
+                stroke="#FFE600"
                 dot={{ r: 3 }}
                 activeDot={{ r: 5 }}
                 strokeWidth={2}
@@ -983,17 +996,26 @@ const SummaryTab: React.FC<{ results: MacroModelResults; thresholds: MacroModelT
           <Table>
             <TableHead>
               <TableRow>
-                <TableCell><strong>Macro Variable</strong></TableCell>
-                <TableCell><strong>Result</strong></TableCell>
-                <TableCell><strong>Interpretation</strong></TableCell>
+                <TableCell sx={{ fontWeight: 'bold', color: headerColor }}><strong>Macro Variable</strong></TableCell>
+                <TableCell sx={{ fontWeight: 'bold', color: headerColor }}><strong>Interpretation</strong></TableCell>
+                <TableCell align='center' sx={{ fontWeight: 'bold', color: headerColor }}><strong>Result</strong></TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {Object.entries(stationarityResults).map(([variable, { status, interpretation }]) => (
                 <TableRow key={variable}>
                   <TableCell>{variable}</TableCell>
-                  <TableCell><TestResultChip test="Stationarity Test" result={{ is_stationary: status === 'Pass' }} /></TableCell>
                   <TableCell>{interpretation}</TableCell>
+                  <TableCell
+                    align="center"
+                    sx={{
+                      backgroundColor: status === 'Pass' ? '#04a60c' : '#f54141',
+                      fontWeight: 'bold',
+                      color: 'white'
+                    }}
+                  >
+                    {status}
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
@@ -1090,11 +1112,14 @@ const StationarityTab: React.FC<{ results: MacroModelResults; thresholds: MacroM
           </FormControl>
           <Box sx={{ width: '100%', height: 400 }}>
             <ResponsiveContainer>
-              <LineChart data={results.time_series_data}>
+              <LineChart margin={{ top: 20, right: 40, bottom: 40, left: 40 }} data={results.time_series_data}>
                 <CartesianGrid stroke={isDarkMode ? "#616161" : "#CCCCCC"} strokeDasharray="3 3" />
                 <XAxis
                   dataKey="snapshot_ccyymm"
                   name="Time"
+                  angle={-45}
+                  textAnchor="end"
+                  height={60}
                   tick={{ fill: isDarkMode ? "#E0E0E0" : "#000000" }}
                   stroke={isDarkMode ? "#E0E0E0" : "#000000"}
                 />
@@ -1103,6 +1128,8 @@ const StationarityTab: React.FC<{ results: MacroModelResults; thresholds: MacroM
                   label={{
                     value: selectedSeries[0] || 'Left Axis',
                     angle: -90,
+                    offset: -20,
+                    dy: 50,
                     position: 'insideLeft',
                     fill: isDarkMode ? "#E0E0E0" : "#000000",
                   }}
@@ -1116,6 +1143,7 @@ const StationarityTab: React.FC<{ results: MacroModelResults; thresholds: MacroM
                     label={{
                       value: selectedSeries[1] || 'Right Axis',
                       angle: 90,
+                      dy: 50,
                       position: 'insideRight',
                       fill: isDarkMode ? "#E0E0E0" : "#000000",
                     }}

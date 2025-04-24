@@ -96,6 +96,8 @@ const EADModel: React.FC = () => {
   const [selectedQuarter, setSelectedQuarter] = useState<string>('');
   const [selectedPortfolio, setSelectedPortfolio] = useState<string>('');
   const [selectedModelName, setSelectedModelName] = useState<string>('');
+  const [quarters, setQuarters] = useState<string[]>([]);
+  const [portfolios, setPortfolios] = useState<string[]>([]);
   const [modelNames, setModelNames] = useState<string[]>([]);
   const [comparisonData, setComparisonData] = useState<EADComparisonData[]>([]);
   const [error, setError] = useState<{ message: string; details?: string } | null>(null);
@@ -104,7 +106,7 @@ const EADModel: React.FC = () => {
   const [isInitialFetch, setIsInitialFetch] = useState(true);
   const [thresholds, setThresholds] = useState<Thresholds>(() => {
     const stored = localStorage.getItem('eadThresholds');
-    const defaults = { MAPE: 15.0, 'R-squared': 0.8 };
+    const defaults = { MAPE: 0.15, 'R-squared': 0.8 };
     if (!stored) return defaults;
     try {
       const parsed = JSON.parse(stored);
@@ -124,10 +126,10 @@ const EADModel: React.FC = () => {
       try {
         const parsed = JSON.parse(stored);
         setThresholds({
-          MAPE: parsed.find((t: any) => t.metric === 'MAPE')?.threshold ?? 15.0,
+          MAPE: parsed.find((t: any) => t.metric === 'MAPE')?.threshold ?? 0.15,
           'R-squared': parsed.find((t: any) => t.metric === 'R-squared')?.threshold ?? 0.8,
         });
-      } catch {}
+      } catch { }
     }
     if (results) calculatePerformanceMetrics(results);
   };
@@ -165,7 +167,16 @@ const EADModel: React.FC = () => {
         modelName: modelName || 'Default Model',
       })));
       calculatePerformanceMetrics(response);
-
+      const quarterFromData = [...new Set(response.additional_data.map((item: any) => item.Quarter))].sort();
+      setQuarters(quarterFromData);
+      if (!selectedQuarter && quarterFromData.length > 0 && isInitialFetch) {
+        setSelectedQuarter(quarterFromData[0]); // Set without immediate re-fetch
+      }
+      const portfolioFromData = [...new Set(response.additional_data.map((item: any) => item.Portfolio))].sort();
+      setPortfolios(portfolioFromData);
+      if (!selectedPortfolio && portfolioFromData.length > 0 && isInitialFetch) {
+        setSelectedPortfolio(portfolioFromData[0]); // Set without immediate re-fetch
+      }
       const modelNamesFromData = [...new Set(response.additional_data.map((item: any) => item.ModelName))].sort();
       setModelNames(modelNamesFromData);
       if (!selectedModelName && modelNamesFromData.length > 0 && isInitialFetch) {
@@ -214,33 +225,30 @@ const EADModel: React.FC = () => {
       <Typography variant="body2" sx={{ mt: 1 }}>Check the browser console for more details.</Typography>
     </Paper>
   );
-
   return (
     <Paper elevation={3} sx={{ p: 2, bboxShadow: 3, borderRadius: 4 }}>
       <Typography variant="h6" gutterBottom>EAD Model Analysis</Typography>
       <Grid container spacing={2}>
         <Grid item xs={12} sm={4}>
-          <FormControl fullWidth variant="outlined" size="small">
+          <FormControl fullWidth variant="outlined" size="small" sx={{ backgroundColor: isDarkMode ?'grey.700' : 'grey.200'  }}>
             <InputLabel>Quarter</InputLabel>
             <Select value={selectedQuarter} label="Quarter" onChange={handleChange(setSelectedQuarter)}>
               <MenuItem value="">All Quarters</MenuItem>
-              <MenuItem value="2024Q1">2024 Q1</MenuItem>
-              <MenuItem value="2023Q4">2023 Q4</MenuItem>
+              {quarters.map(m => <MenuItem key={m} value={m}>{m}</MenuItem>)}
             </Select>
           </FormControl>
         </Grid>
         <Grid item xs={12} sm={4}>
-          <FormControl fullWidth variant="outlined" size="small">
+          <FormControl fullWidth variant="outlined" size="small" sx={{ backgroundColor: isDarkMode ?'grey.700' : 'grey.200' }}>
             <InputLabel>Portfolio</InputLabel>
             <Select value={selectedPortfolio} label="Portfolio" onChange={handleChange(setSelectedPortfolio)}>
               <MenuItem value="">All Portfolios</MenuItem>
-              <MenuItem value="retail">Retail</MenuItem>
-              <MenuItem value="corporate">Corporate</MenuItem>
+              {portfolios.map(m => <MenuItem key={m} value={m}>{m}</MenuItem>)}
             </Select>
           </FormControl>
         </Grid>
         <Grid item xs={12} sm={4}>
-          <FormControl fullWidth variant="outlined" size="small">
+          <FormControl fullWidth variant="outlined" size="small" sx={{ backgroundColor: isDarkMode ? 'grey.700' : 'grey.200' }}>
             <InputLabel>Model Name</InputLabel>
             <Select value={selectedModelName} label="Model Name" onChange={handleChange(setSelectedModelName)}>
               <MenuItem value="">All Models</MenuItem>
@@ -253,25 +261,25 @@ const EADModel: React.FC = () => {
         <Box sx={{ flex: 1, overflow: 'auto', width: '100%', mt: 2 }}>
           <Box sx={{ mb: 3 }}>
             <TableContainer component={Paper}>
-              <Table>
+              <Table sx={{ backgroundColor: isDarkMode ? 'grey.600' : 'grey.200' }}>
                 <TableHead>
-                  <TableRow>
-                    <TableCell>Metrics</TableCell>
-                    <TableCell align="right">Value</TableCell>
-                    <TableCell align="right">Threshold</TableCell>
-                    <TableCell align="right">Result</TableCell>
+                  <TableRow sx={{ backgroundColor: '#FFE600' }}>
+                    <TableCell sx={{ fontWeight: 'bold', color: 'black' }}>Metrics</TableCell>
+                    <TableCell align="center" sx={{ fontWeight: 'bold', color: 'black' }}>Value</TableCell>
+                    <TableCell align="center" sx={{ fontWeight: 'bold', color: 'black' }}>Threshold</TableCell>
+                    <TableCell align="center" sx={{ fontWeight: 'bold', color: 'black' }}>Result</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
                   {performanceMetrics.map((metric, index) => (
                     <TableRow key={index}>
                       <TableCell>{metric.metric}</TableCell>
-                      <TableCell align="right">{metric.value.toFixed(4)}</TableCell>
-                      <TableCell align="right">{metric.threshold.toFixed(4)}</TableCell>
+                      <TableCell align="center">{metric.value.toFixed(4)}</TableCell>
+                      <TableCell align="center">{metric.threshold.toFixed(4)}</TableCell>
                       <TableCell
-                        align="right"
+                        align="center"
                         sx={{
-                          color: metric.status === "Pass" ? "#3cd644" : "#f54141",
+                          backgroundColor: metric.status === "Pass" ? '#04a60c' : '#f54141',
                           fontWeight: "bold",
                         }}
                       >
@@ -334,7 +342,7 @@ const EADModel: React.FC = () => {
                 <Scatter
                   name="EAD Comparison"
                   data={comparisonData}
-                  fill="#42A5F5" // Bright blue for scatter points
+                  fill= {isDarkMode ? '#FFE600' : "#42A5F5"} // Bright blue for scatter points
                   stroke="#FFFFFF" // White outline for better contrast
                   strokeWidth={1}
                 />

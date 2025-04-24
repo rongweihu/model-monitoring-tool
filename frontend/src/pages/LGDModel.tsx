@@ -103,7 +103,7 @@ const LGDModel: React.FC = () => {
   const [error, setError] = useState<{ message: string; details?: string } | null>(null);
   const [thresholds, setThresholds] = useState<Thresholds>(() => {
     const stored = localStorage.getItem('lgdThresholds');
-    const defaults = { MAPE: 20.0, 'R-squared': 0.7 };
+    const defaults = { MAPE: 0.20, 'R-squared': 0.7 };
     if (!stored) return defaults;
     try {
       const parsed = JSON.parse(stored);
@@ -123,10 +123,10 @@ const LGDModel: React.FC = () => {
       try {
         const parsed = JSON.parse(stored);
         setThresholds({
-          MAPE: parsed.find((t: any) => t.metric === 'MAPE')?.threshold ?? 20.0,
+          MAPE: parsed.find((t: any) => t.metric === 'MAPE')?.threshold ?? 0.20,
           'R-squared': parsed.find((t: any) => t.metric === 'R-squared')?.threshold ?? 0.7,
         });
-      } catch {}
+      } catch { }
     }
     if (results) calculatePerformanceMetrics(results);
   };
@@ -151,7 +151,7 @@ const LGDModel: React.FC = () => {
       setQuarterOptions(options.quarters.sort());
       setPortfolioOptions(options.portfolios.sort());
       setModelNameOptions(options.modelNames.sort());
-    } catch {}
+    } catch { }
   };
 
   const fetchLGDAnalysis = async (quarter?: string, portfolio?: string, modelName?: string) => {
@@ -208,140 +208,140 @@ const LGDModel: React.FC = () => {
       {error.details && <Typography variant="body1" sx={{ mt: 1, color: 'black' }}>{error.details}</Typography>}
     </Paper>
   );
-
+  const headerColor = isDarkMode ? '#FFE600' : 'black'
   return (
-      <Paper elevation={3} sx={{ p: 2, bboxShadow: 3, borderRadius: 4  }}>
-        <Typography variant="h6" gutterBottom>LGD Model Analysis</Typography>
-        <Grid container spacing={2}>
-          <Grid item xs={12} sm={4}>
-            <FormControl fullWidth variant="outlined" size="small">
-              <InputLabel>Quarter</InputLabel>
-              <Select value={selectedQuarter} label="Quarter" onChange={handleChange(setSelectedQuarter)}>
-                <MenuItem value="">All Quarters</MenuItem>
-                {quarterOptions.map(q => <MenuItem key={q} value={q}>{q}</MenuItem>)}
-              </Select>
-            </FormControl>
-          </Grid>
-          <Grid item xs={12} sm={4}>
-            <FormControl fullWidth variant="outlined" size="small">
-              <InputLabel>Portfolio</InputLabel>
-              <Select value={selectedPortfolio} label="Portfolio" onChange={handleChange(setSelectedPortfolio)}>
-                <MenuItem value="">All Portfolios</MenuItem>
-                {portfolioOptions.map(p => <MenuItem key={p} value={p}>{p}</MenuItem>)}
-              </Select>
-            </FormControl>
-          </Grid>
-          <Grid item xs={12} sm={4}>
-            <FormControl fullWidth variant="outlined" size="small">
-              <InputLabel>Model Name</InputLabel>
-              <Select value={selectedModelName} label="Model Name" onChange={handleChange(setSelectedModelName)}>
-                <MenuItem value="">All Models</MenuItem>
-                {modelNameOptions.map(m => <MenuItem key={m} value={m}>{m}</MenuItem>)}
-              </Select>
-            </FormControl>
-          </Grid>
+    <Paper elevation={3} sx={{ p: 2, bboxShadow: 3, borderRadius: 4 }}>
+      <Typography variant="h6" gutterBottom>LGD Model Analysis</Typography>
+      <Grid container spacing={2}>
+        <Grid item xs={12} sm={4}>
+          <FormControl fullWidth variant="outlined" size="small" sx={{ backgroundColor: isDarkMode ? 'grey.700' : 'grey.200' }}>
+            <InputLabel>Quarter</InputLabel>
+            <Select value={selectedQuarter} label="Quarter" onChange={handleChange(setSelectedQuarter)}>
+              <MenuItem value="">All Quarters</MenuItem>
+              {quarterOptions.map(q => <MenuItem key={q} value={q}>{q}</MenuItem>)}
+            </Select>
+          </FormControl>
         </Grid>
-        {results && (
-          <Box sx={{ flex: 1, overflow: 'auto', width: '100%', mt: 2 }}>
-            <Box sx={{ mb: 3 }}>
-              <TableContainer component={Paper}>
-                <Table>
-                  <TableHead>
-                    <TableRow>
-                      <TableCell>Metrics</TableCell>
-                      <TableCell align="right">Value</TableCell>
-                      <TableCell align="right">Threshold</TableCell>
-                      <TableCell align="right">Result</TableCell>
+        <Grid item xs={12} sm={4}>
+          <FormControl fullWidth variant="outlined" size="small" sx={{ backgroundColor: isDarkMode ? 'grey.700' : 'grey.200'  }}>
+            <InputLabel>Portfolio</InputLabel>
+            <Select value={selectedPortfolio} label="Portfolio" onChange={handleChange(setSelectedPortfolio)}>
+              <MenuItem value="">All Portfolios</MenuItem>
+              {portfolioOptions.map(p => <MenuItem key={p} value={p}>{p}</MenuItem>)}
+            </Select>
+          </FormControl>
+        </Grid>
+        <Grid item xs={12} sm={4}>
+          <FormControl fullWidth variant="outlined" size="small" sx={{ backgroundColor: isDarkMode ? 'grey.700' : 'grey.200' }}>
+            <InputLabel>Model Name</InputLabel>
+            <Select value={selectedModelName} label="Model Name" onChange={handleChange(setSelectedModelName)}>
+              <MenuItem value="">All Models</MenuItem>
+              {modelNameOptions.map(m => <MenuItem key={m} value={m}>{m}</MenuItem>)}
+            </Select>
+          </FormControl>
+        </Grid>
+      </Grid>
+      {results && (
+        <Box sx={{ flex: 1, overflow: 'auto', width: '100%', mt: 2 }}>
+          <Box sx={{ mb: 3 }}>
+            <TableContainer component={Paper}>
+              <Table>
+                <TableHead>
+                  <TableRow sx={{ backgroundColor: '#FFE600' }}>
+                    <TableCell sx={{ fontWeight: 'bold', color: 'black' }}>Metrics</TableCell>
+                    <TableCell align="center" sx={{ fontWeight: 'bold', color: 'black' }}>Value</TableCell>
+                    <TableCell align="center" sx={{ fontWeight: 'bold', color: 'black' }}>Threshold</TableCell>
+                    <TableCell align="center" sx={{ fontWeight: 'bold', color: 'black' }}>Result</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody sx={{ backgroundColor: isDarkMode ?'grey.700' : 'grey.200'  }}>
+                  {performanceMetrics.map((metric, index) => (
+                    <TableRow key={index}>
+                      <TableCell>{metric.metric}</TableCell>
+                      <TableCell align="center">{metric.value.toFixed(4)}</TableCell>
+                      <TableCell align="center">{metric.threshold.toFixed(4)}</TableCell>
+                      <TableCell
+                        align="center"
+                        sx={{
+                          backgroundColor: metric.status === "Pass" ? '#04a60c' : '#f54141',
+                          fontWeight: "bold",
+                        }}
+                      >
+                        {metric.status === "Pass" ? "PASS" : "FAIL"}
+                      </TableCell>
                     </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {performanceMetrics.map((metric, index) => (
-                      <TableRow key={index}>
-                        <TableCell>{metric.metric}</TableCell>
-                        <TableCell align="right">{metric.value.toFixed(4)}</TableCell>
-                        <TableCell align="right">{metric.threshold.toFixed(4)}</TableCell>
-                        <TableCell
-                          align="right"
-                          sx={{
-                            color: metric.status === "Pass" ? "#3cd644" : "#f54141",
-                            fontWeight: "bold",
-                          }}
-                        >
-                          {metric.status === "Pass" ? "PASS" : "FAIL"}
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </TableContainer>
-            </Box>
-            <Box sx={{ width: '100%', height: '50vh', minHeight: 400, mb: 2, px: 0 }}>
-              <ResponsiveContainer width="100%" height="100%">
-                <ScatterChart margin={{ top: 20, right: 40, bottom: 40, left: 60 }}>
-                  <CartesianGrid
-                    stroke={isDarkMode ? "#616161" : "#CCCCCC"} // Lighter grey for dark mode, standard grey for light mode
-                    strokeDasharray="3 3"
-                  />
-                  <XAxis
-                    type="number"
-                    dataKey="actual"
-                    name="Actual LGD"
-                    tickFormatter={(value) => value.toFixed(0)}
-                    label={{
-                      value: 'Actual LGD',
-                      position: 'bottom',
-                      offset: 20,
-                      fill: isDarkMode ? "#E0E0E0" : "#000000", // Light grey for dark mode, black for light mode
-                    }}
-                    stroke={isDarkMode ? "#E0E0E0" : "#000000"} // Axis line color
-                    tick={{ fill: isDarkMode ? "#E0E0E0" : "#000000" }} // Tick mark color
-                  />
-                  <YAxis
-                    type="number"
-                    dataKey="predicted"
-                    name="Predicted LGD"
-                    tickFormatter={(value) => value.toFixed(0)}
-                    label={{
-                      value: 'Predicted LGD',
-                      angle: -90,
-                      position: 'insideLeft',
-                      offset: -30,
-                      style: { textAnchor: 'middle' },
-                      fill: isDarkMode ? "#E0E0E0" : "#000000", // Light grey for dark mode, black for light mode
-                    }}
-                    stroke={isDarkMode ? "#E0E0E0" : "#000000"} // Axis line color
-                    tick={{ fill: isDarkMode ? "#E0E0E0" : "#000000" }} // Tick mark color
-                  />
-                  <RechartsTooltip
-                    contentStyle={{
-                      backgroundColor: isDarkMode ? theme.palette.background.paper : 'white',
-                      color: isDarkMode ? theme.palette.text.primary : 'black',
-                      border: `1px solid ${isDarkMode ? "#616161" : "#CCCCCC"}`,
-                      fontSize: '14px',
-                    }}
-                    labelStyle={{ color: isDarkMode ? theme.palette.text.primary : 'black', fontWeight: 'bold' }}
-                    itemStyle={{ color: isDarkMode ? theme.palette.text.secondary : 'black' }}
-                    formatter={(value: number) => value.toFixed(4)}
-                  />
-                  <Scatter
-                    name={selectedModelName || 'Default Model'}
-                    data={comparisonData}
-                    fill="#42A5F5" // Bright blue for scatter points
-                    stroke="#FFFFFF" // White outline for better contrast
-                    strokeWidth={1}
-                  />
-                </ScatterChart>
-              </ResponsiveContainer>
-            </Box>
-            {results.decile_data && (
-              <Box sx={{ mt: 4 }}>
-                <Typography variant="h6" gutterBottom>Decile Analysis</Typography>
-                <DecileTable data={results.decile_data.data} totalCount={results.decile_data.total_count} isDarkMode={isDarkMode} />
-              </Box>
-            )}
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
           </Box>
-        )}
-      </Paper>
+          <Box sx={{ width: '100%', height: '50vh', minHeight: 400, mb: 2, px: 0 }}>
+            <ResponsiveContainer width="100%" height="100%">
+              <ScatterChart margin={{ top: 20, right: 40, bottom: 40, left: 60 }}>
+                <CartesianGrid
+                  stroke={isDarkMode ? "#616161" : "#CCCCCC"} // Lighter grey for dark mode, standard grey for light mode
+                  strokeDasharray="3 3"
+                />
+                <XAxis
+                  type="number"
+                  dataKey="actual"
+                  name="Actual LGD"
+                  tickFormatter={(value) => value.toFixed(0)}
+                  label={{
+                    value: 'Actual LGD',
+                    position: 'bottom',
+                    offset: 20,
+                    fill: isDarkMode ? "#E0E0E0" : "#000000", // Light grey for dark mode, black for light mode
+                  }}
+                  stroke={isDarkMode ? "#E0E0E0" : "#000000"} // Axis line color
+                  tick={{ fill: isDarkMode ? "#E0E0E0" : "#000000" }} // Tick mark color
+                />
+                <YAxis
+                  type="number"
+                  dataKey="predicted"
+                  name="Predicted LGD"
+                  tickFormatter={(value) => value.toFixed(0)}
+                  label={{
+                    value: 'Predicted LGD',
+                    angle: -90,
+                    position: 'insideLeft',
+                    offset: -30,
+                    style: { textAnchor: 'middle' },
+                    fill: isDarkMode ? "#E0E0E0" : "#000000", // Light grey for dark mode, black for light mode
+                  }}
+                  stroke={isDarkMode ? "#E0E0E0" : "#000000"} // Axis line color
+                  tick={{ fill: isDarkMode ? "#E0E0E0" : "#000000" }} // Tick mark color
+                />
+                <RechartsTooltip
+                  contentStyle={{
+                    backgroundColor: isDarkMode ? theme.palette.background.paper : 'white',
+                    color: isDarkMode ? theme.palette.text.primary : 'black',
+                    border: `1px solid ${isDarkMode ? "#616161" : "#CCCCCC"}`,
+                    fontSize: '14px',
+                  }}
+                  labelStyle={{ color: isDarkMode ? theme.palette.text.primary : 'black', fontWeight: 'bold' }}
+                  itemStyle={{ color: isDarkMode ? theme.palette.text.secondary : 'black' }}
+                  formatter={(value: number) => value.toFixed(4)}
+                />
+                <Scatter
+                  name={selectedModelName || 'Default Model'}
+                  data={comparisonData}
+                  fill= {isDarkMode ? '#FFE600' : "#42A5F5"}// Bright blue for scatter points
+                  stroke="#FFFFFF" // White outline for better contrast
+                  strokeWidth={1}
+                />
+              </ScatterChart>
+            </ResponsiveContainer>
+          </Box>
+          {results.decile_data && (
+            <Box sx={{ mt: 4 }}>
+              <Typography variant="h6" gutterBottom>Decile Analysis</Typography>
+              <DecileTable data={results.decile_data.data} totalCount={results.decile_data.total_count} isDarkMode={isDarkMode} />
+            </Box>
+          )}
+        </Box>
+      )}
+    </Paper>
   );
 };
 

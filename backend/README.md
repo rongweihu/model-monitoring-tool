@@ -53,9 +53,8 @@ backend/
 ├── app.py                # Main Flask application with API endpoints
 ├── models.py             # SQLAlchemy database models
 ├── requirements.txt      # Python dependencies
-├── uploads/              # Directory for temporary file storage
 ├── data/                 # Sample data and test files
-└── tests/                # Unit and integration tests
+
 ```
 
 ## 🔧 Key Components
@@ -83,7 +82,6 @@ The backend provides the following main API endpoints:
 - `POST /api/analyze/lgd`: Analyze LGD model performance
 - `POST /api/analyze/ead`: Analyze EAD model performance
 - `POST /api/analyze/macro`: Analyze macro model performance
-- `POST /api/analyze/rating_transition`: Analyze rating transitions
 - `POST /api/analyze/stability`: Calculate stability metrics
 
 #### Configuration
@@ -113,7 +111,7 @@ The backend implements various statistical analysis functions:
 
 1. Clone the repository and navigate to the backend directory:
    ```bash
-   git clone https://github.com/yourusername/mmt.git
+   git clone https://github.com/rongweihu/model-monitoring-tool.git
    cd mmt/backend
    ```
 

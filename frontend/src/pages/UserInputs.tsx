@@ -13,13 +13,12 @@ interface ModelCriteria {
 
 interface UserThresholdsResponse {
   pdCriteria?: ModelCriteria[];
-  macroThresholds?: ModelCriteria[];
+  macroModelThresholds?: MacroModelThresholds;
   eadThresholds?: ModelCriteria[];
+  lgdThresholds?: ModelCriteria[];
 }
 
 interface MacroModelThresholds {
-  normality_threshold: number;
-  autocorrelation_threshold: number;
   heteroscedasticity_threshold: number;
   rmse_threshold: number;
   r_squared_threshold: number;
@@ -61,39 +60,33 @@ const ThresholdField: React.FC<{
 
 // === Main Component ===
 const UserInputs: React.FC = () => {
-  const [pdCriteria, setPdCriteria] = useState<ModelCriteria[]>([
-    { metric: 'Gini Coefficient', threshold: 0.2, description: 'Minimum acceptable Gini value' },
-    { metric: 'KS Statistic', threshold: 0.3, description: 'Minimum acceptable KS value' },
-    { metric: 'PSI', threshold: 0.1, description: 'Maximum acceptable PSI value' },
-  ]);
+  const [pdCriteria, setPdCriteria] = useState<ModelCriteria[]>(() => {
+    const stored = localStorage.getItem('pdCriteria');
+    return stored ? JSON.parse(stored) : [
+      { metric: 'Gini Coefficient', threshold: 0.2, description: 'Minimum acceptable Gini value' },
+      { metric: 'KS Statistic', threshold: 0.3, description: 'Minimum acceptable KS value' },
+    ];
+  });
 
-  const [macroThresholds, setMacroThresholds] = useState<ModelCriteria[]>([
-    { metric: 'R-squared', threshold: 0.7, description: 'Minimum R-squared value' },
-    { metric: 'P-value', threshold: 0.05, description: 'Maximum p-value for significance' },
-  ]);
+  const [eadThresholds, setEADThresholds] = useState<ModelCriteria[]>(() => {
+    const stored = localStorage.getItem('eadThresholds');
+    return stored ? JSON.parse(stored) : [
+      { metric: 'MAPE', threshold: 0.15, description: 'Maximum acceptable Mean Absolute Percentage Error' },
+      { metric: 'R-squared', threshold: 0.8, description: 'Minimum acceptable R-squared value' },
+    ];
+  });
 
-  const [eadThresholds, setEADThresholds] = useState<ModelCriteria[]>([
-    { metric: 'MAPE', threshold: 15.0, description: 'Maximum acceptable Mean Absolute Percentage Error' },
-    { metric: 'R-squared', threshold: 0.8, description: 'Minimum acceptable R-squared value' },
-  ]);
-
-  const [lgdThresholds, setLgdThresholds] = useState<{
-    mape: number;
-    rSquared: number;
-  }>(() => {
-    const savedMAPE = localStorage.getItem('lgdMAPEThreshold');
-    const savedRSquared = localStorage.getItem('lgdRSquaredThreshold');
-    return {
-      mape: savedMAPE ? parseFloat(savedMAPE) : 20,
-      rSquared: savedRSquared ? parseFloat(savedRSquared) : 0.7,
-    };
+  const [lgdThresholds, setLGDThresholds] = useState<ModelCriteria[]>(() => {
+    const stored = localStorage.getItem('lgdThresholds');
+    return stored ? JSON.parse(stored) : [
+      { metric: 'MAPE', threshold: 0.15, description: 'Maximum acceptable Mean Absolute Percentage Error' },
+      { metric: 'R-squared', threshold: 0.8, description: 'Minimum acceptable R-squared value' },
+    ];
   });
 
   const [macroModelThresholds, setMacroModelThresholds] = useState<MacroModelThresholds>(() => {
     const stored = localStorage.getItem('macroModelThresholds');
     const defaults = {
-      normality_threshold: 0.05,
-      autocorrelation_threshold: 1.5,
       heteroscedasticity_threshold: 0.05,
       rmse_threshold: 0.1,
       r_squared_threshold: 0.7,
@@ -102,39 +95,30 @@ const UserInputs: React.FC = () => {
     return stored ? { ...defaults, ...JSON.parse(stored) } : defaults;
   });
 
-  // Fetch thresholds from backend or localStorage
+  // Fetch thresholds from backend
   const fetchUserThresholds = async () => {
-    const loadFromLocalStorage = () => {
-      const localPd = localStorage.getItem('pdCriteria');
-      const localMacro = localStorage.getItem('macroThresholds');
-      const localEAD = localStorage.getItem('eadThresholds');
-      if (localPd) setPdCriteria(JSON.parse(localPd));
-      if (localMacro) setMacroThresholds(JSON.parse(localMacro));
-      if (localEAD) {
-        const parsedEAD = JSON.parse(localEAD).filter((t: ModelCriteria) => ['MAPE', 'R-squared'].includes(t.metric));
-        setEADThresholds(parsedEAD.length > 0 ? parsedEAD : eadThresholds);
-      }
-    };
-
     try {
       const response = await axios.get<UserThresholdsResponse>('http://localhost:5000/api/user-thresholds');
-      const { pdCriteria, macroThresholds, eadThresholds } = response.data;
+      const { pdCriteria, macroModelThresholds, eadThresholds, lgdThresholds } = response.data;
 
       if (pdCriteria) {
         setPdCriteria(pdCriteria);
         localStorage.setItem('pdCriteria', JSON.stringify(pdCriteria));
       }
-      if (macroThresholds) {
-        setMacroThresholds(macroThresholds);
-        localStorage.setItem('macroThresholds', JSON.stringify(macroThresholds));
+      if (macroModelThresholds) {
+        setMacroModelThresholds(macroModelThresholds);
+        localStorage.setItem('macroModelThresholds', JSON.stringify(macroModelThresholds));
       }
       if (eadThresholds) {
-        const filteredEAD = eadThresholds.filter(t => ['MAPE', 'R-squared'].includes(t.metric));
-        setEADThresholds(filteredEAD.length > 0 ? filteredEAD : eadThresholds);
-        localStorage.setItem('eadThresholds', JSON.stringify(filteredEAD.length > 0 ? filteredEAD : eadThresholds));
+        setEADThresholds(eadThresholds);
+        localStorage.setItem('eadThresholds', JSON.stringify(eadThresholds));
       }
-    } catch {
-      loadFromLocalStorage(); // Fallback to localStorage
+      if (lgdThresholds) {
+        setLGDThresholds(lgdThresholds);
+        localStorage.setItem('lgdThresholds', JSON.stringify(lgdThresholds));
+      }
+    } catch (error) {
+      console.error('Failed to fetch thresholds from backend:', error);
     }
   };
 
@@ -142,15 +126,16 @@ const UserInputs: React.FC = () => {
   const saveUserThresholds = async () => {
     const payload = {
       pdCriteria,
-      macroThresholds,
-      eadThresholds: eadThresholds.filter(t => ['MAPE', 'R-squared'].includes(t.metric)),
+      macroModelThresholds,
+      eadThresholds,
+      lgdThresholds,
     };
 
     const saveToLocalStorage = () => {
       localStorage.setItem('pdCriteria', JSON.stringify(pdCriteria));
-      localStorage.setItem('macroThresholds', JSON.stringify(macroThresholds));
+      localStorage.setItem('macroModelThresholds', JSON.stringify(macroModelThresholds));
       localStorage.setItem('eadThresholds', JSON.stringify(eadThresholds));
-      window.dispatchEvent(new StorageEvent('storage', { key: 'eadThresholds', newValue: JSON.stringify(eadThresholds) }));
+      localStorage.setItem('lgdThresholds', JSON.stringify(lgdThresholds));
     };
 
     try {
@@ -164,7 +149,7 @@ const UserInputs: React.FC = () => {
   };
 
   // Handle threshold changes
-  const handleCriteriaChange = (type: 'pd' | 'macro' | 'ead', index: number, value: string) => {
+  const handleCriteriaChange = (type: 'pd' | 'ead' | 'lgd', index: number, value: string) => {
     const numericValue = parseFloat(value) || 0;
     const updateCriteria = (prev: ModelCriteria[]) => {
       const updated = [...prev];
@@ -176,11 +161,11 @@ const UserInputs: React.FC = () => {
       case 'pd':
         setPdCriteria(updateCriteria);
         break;
-      case 'macro':
-        setMacroThresholds(updateCriteria);
-        break;
       case 'ead':
         setEADThresholds(updateCriteria);
+        break;
+      case 'lgd':
+        setLGDThresholds(updateCriteria);
         break;
     }
   };
@@ -193,7 +178,7 @@ const UserInputs: React.FC = () => {
   };
 
   // Render criteria fields
-  const renderCriteriaFields = (criteria: ModelCriteria[], type: 'pd' | 'macro' | 'ead') => (
+  const renderCriteriaFields = (criteria: ModelCriteria[], type: 'pd' | 'ead' | 'lgd') => (
     criteria.map((criterion, index) => (
       <Grid item xs={12} sm={4} key={criterion.metric}>
         <ThresholdField
@@ -201,7 +186,7 @@ const UserInputs: React.FC = () => {
           value={criterion.threshold}
           onChange={(value) => handleCriteriaChange(type, index, value.toString())}
           helperText={criterion.description}
-          max={type === 'pd' || type === 'macro' ? 1 : undefined}
+          max={type === 'pd' ? 1 : undefined}
         />
       </Grid>
     ))
@@ -211,14 +196,8 @@ const UserInputs: React.FC = () => {
     fetchUserThresholds();
   }, []);
 
-  useEffect(() => {
-    localStorage.setItem('lgdMAPEThreshold', lgdThresholds.mape.toString());
-    localStorage.setItem('lgdRSquaredThreshold', lgdThresholds.rSquared.toString());
-    window.dispatchEvent(new Event('lgdThresholdUpdate'));
-  }, [lgdThresholds]);
-
   return (
-    <Paper elevation={3} sx={{ p: 2, bboxShadow: 3, borderRadius: 4  }}>
+    <Paper elevation={3} sx={{ p: 2, bboxShadow: 3, borderRadius: 4 }}>
       <Typography
         variant="h4"
         gutterBottom
@@ -250,27 +229,9 @@ const UserInputs: React.FC = () => {
       </Box>
 
       <Box sx={{ mb: 4, p: 3, backgroundColor: 'background.paper', borderRadius: 2 }}>
-        <SectionHeader title="LGD Model Thresholds" />
+        <SectionHeader title="LGD Model Performance Thresholds" />
         <Grid container spacing={2}>
-          <Grid item xs={12} sm={6}>
-            <ThresholdField
-              label="MAPE Threshold (%)"
-              value={lgdThresholds.mape}
-              onChange={(value) => setLgdThresholds(prev => ({ ...prev, mape: value }))}
-              helperText="Maximum acceptable Mean Absolute Percentage Error"
-              step={0.1}
-              max={100}
-            />
-          </Grid>
-          <Grid item xs={12} sm={6}>
-            <ThresholdField
-              label="R-squared Threshold"
-              value={lgdThresholds.rSquared}
-              onChange={(value) => setLgdThresholds(prev => ({ ...prev, rSquared: value }))}
-              helperText="Minimum acceptable R-squared value"
-              max={1}
-            />
-          </Grid>
+          {renderCriteriaFields(lgdThresholds, 'lgd')}
         </Grid>
       </Box>
 

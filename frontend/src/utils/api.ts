@@ -118,13 +118,10 @@ export const api = {
     }
   },
 
-  uploadFile: async (type: 'macro' | 'pd' | 'lgd' | 'ead' | 'pd_baseline', file: File) => {
-    const formData = new FormData();
-    formData.append('file', file);
-
+  uploadFile: async (type: 'macro' | 'pd' | 'lgd' | 'ead' | 'pd_baseline', formData: FormData) => {
     try {
       const response = await axios.post(`${BASE_URL}/api/upload/${type}`, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
+        headers: {},
       });
       return response.data;
     } catch (error) {
@@ -132,13 +129,10 @@ export const api = {
     }
   },
 
-  uploadLGD: async (file: File): Promise<LGDUploadResponse | undefined> => {
-    const formData = new FormData();
-    formData.append('file', file);
-
+  uploadLGD: async (formData: FormData): Promise<LGDUploadResponse | undefined> => {
     try {
       const response = await axios.post<LGDUploadResponse>(`${BASE_URL}/api/upload/lgd`, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
+        headers: {},
         validateStatus: status => (status >= 200 && status < 300) || status === 400,
       });
 
@@ -152,14 +146,10 @@ export const api = {
     }
   },
 
-  uploadMacroFile: async (file: File): Promise<any> => {
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('description', 'Macro economic data file');
-
+  uploadMacroFile: async (formData: FormData): Promise<any> => {
     try {
       const response = await axios.post(`${BASE_URL}/api/upload/macro`, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
+        headers: {},
       });
       return response.data;
     } catch (error) {
@@ -205,6 +195,7 @@ export const api = {
       handleApiError(error, 'Stability Calculation');
     }
   },
+
   // Database API methods
   getAllDatasets: async () => {
     try {
@@ -235,7 +226,7 @@ export const api = {
       throw error;
     }
   },
-  
+
   deleteDataset: async (datasetId: number) => {
     try {
       const response = await axios.delete(`${BASE_URL}/api/database/datasets/${datasetId}`);
@@ -250,7 +241,7 @@ export const api = {
       throw error;
     }
   },
-  
+
   deleteAnalysisResult: async (resultId: number) => {
     try {
       const response = await axios.delete(`${BASE_URL}/api/database/analysis-results/${resultId}`);
@@ -295,6 +286,15 @@ export const api = {
         throw new Error(`Analysis Result Fetch Failed: ${errorMessage}`);
       }
       throw error;
+    }
+  },
+
+  getSummaryHistory: async () => {
+    try {
+      const response = await axios.get(`${BASE_URL}/api/summary/history`);
+      return response.data;
+    } catch (error) {
+      handleApiError(error, 'Summary History Fetch');
     }
   },
 };

@@ -24,10 +24,12 @@ import {
   Menu, 
   CreditScore,  
   MonetizationOn,  
-  CompareArrows,  
+  CompareArrows,
+  Dashboard,  
   Public,
   LightMode,
-  DarkMode
+  DarkMode,
+  Storage
 } from '@mui/icons-material';
 import { Link as RouterLink, useLocation } from 'react-router-dom';
 import { createTheme } from '@mui/material/styles';
@@ -42,7 +44,8 @@ const menuItems = [
   { text: 'Macro Model', icon: <Public />, path: '/macro' },
   { text: 'LGD Model', icon: <MonetizationOn />, path: '/lgd' },
   { text: 'EAD Model', icon: <CompareArrows />, path: '/ead' },
-  { text: 'Database Manager', icon: <FolderOpen />, path: '/database' },
+  { text: 'Summary Dashboard', icon: <Dashboard />, path: '/summary/history' },
+  { text: 'Database Manager', icon: <Storage />, path: '/database' },
 ];
 
 interface LayoutProps {
@@ -64,7 +67,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         main: isDarkMode ? '#FFE600' : '#775C01', // EY Yellow
       },
       secondary: {
-        main: isDarkMode ? '#4CAF50' : '#D5D5A5',
+        main: isDarkMode ? '#6787f0' : '#D5D5A5',
       },
       background: {
         default: isDarkMode ? '#2E2E38' : '#F5F5F5',

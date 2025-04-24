@@ -51,25 +51,21 @@ This is the frontend application for the Model Monitoring Tool (MMT), built with
 ```
 src/
 ├── components/         # Reusable UI components
-│   ├── Layout.tsx     # Main application layout
-│   ├── ThemeToggle.tsx # Dark/light theme toggle
+│   ├── Layout.tsx     # Main application layout, Dark/light theme toggle
+│   ├── TestCard.tsx    # TestCard layout
 │   └── ...
 ├── pages/             # Main application pages
+│   ├── Introduction.tsx   # Introduction page
 │   ├── PDModel.tsx    # PD model analysis page
 │   ├── MacroModel.tsx # Macro model analysis page
 │   ├── LGDModel.tsx   # LGD model analysis page
 │   ├── EADModel.tsx   # EAD model analysis page
-│   ├── Summary.tsx    # Summary dashboard page
 │   ├── DataUpload.tsx # Data upload page
+│   ├── UserInputs.tsx # Define thresholds
+│   └── DatabaseManager.tsx # Visulize and manage uploaded datasets and results
 │   └── ...
 ├── utils/             # Utility functions
 │   ├── api.ts         # API client for backend communication
-│   ├── theme.ts       # Theme configuration
-│   └── ...
-├── contexts/          # React context providers
-│   ├── ThemeContext.tsx # Theme context provider
-│   └── ...
-├── types/             # TypeScript type definitions
 │   └── ...
 ├── App.tsx            # Main application component
 ├── main.tsx           # Application entry point
@@ -110,7 +106,7 @@ Each model type has a dedicated analysis page with specialized components:
 
 1. Clone the repository and navigate to the frontend directory:
    ```bash
-   git clone https://github.com/yourusername/mmt.git
+   git clone https://github.com/rongweihu/model-monitoring-tool.git
    cd mmt/frontend
    ```
 

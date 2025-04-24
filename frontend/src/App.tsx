@@ -13,6 +13,7 @@ import UserInputs from './pages/UserInputs';
 import Introduction from './pages/Introduction';
 import DatabaseManager from './pages/DatabaseManager';
 import Layout from './components/Layout'; // Correct path to Layout component
+import SummaryDashboard from './pages/SummaryDashboard';
 
 function App() {
   // We only need isDarkMode state as the toggle functionality is handled in Layout component
@@ -52,6 +53,7 @@ function App() {
               <Route path="/lgd" element={<LGDModel />} />
               <Route path="/ead" element={<EADModel />} />
               <Route path="/macro" element={<MacroModel />} />
+              <Route path="/summary/history" element={<SummaryDashboard />} />
               <Route path="/database" element={<DatabaseManager />} />
             </Routes>
           </Layout>

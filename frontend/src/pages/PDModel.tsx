@@ -65,24 +65,6 @@ const TabPanel: React.FC<TabPanelProps> = ({ children, value, index }) => (
     </div>
 );
 
-const MetricBox: React.FC<{ value: number; threshold: number; label: string }> = ({ value, threshold, label }) => {
-    const isPassing = value >= threshold;
-    return (
-        <Grid item xs={12} md={6}>
-            <Paper sx={{ p: 2, backgroundColor: isPassing ? 'success.light' : 'error.light', color: 'white', textAlign: 'center' }}>
-                <Typography variant="h5" sx={{ fontWeight: 'bold' }}>
-                    {label}
-                    <Typography component="span" variant="body1" sx={{ display: 'block', mt: 1, fontWeight: 'normal' }}>
-                        {value.toFixed(4)} (Threshold: {threshold.toFixed(4)})
-                    </Typography>
-                    <Typography component="span" variant="body1" sx={{ display: 'block', mt: 0, fontWeight: 'bold' }}>
-                        {isPassing ? 'PASS' : 'FAIL'}
-                    </Typography>
-                </Typography>
-            </Paper>
-        </Grid>
-    );
-};
 
 // === Main Component ===
 const PDModel: React.FC = () => {
@@ -176,11 +158,11 @@ const PDModel: React.FC = () => {
     // Sub-Components
     const DiscriminatoryPowerTab: React.FC = () => {
         if (!pdAnalysisResults) return <Typography color="error">No data available</Typography>;
-    
+
         const { discriminatory_power } = pdAnalysisResults;
         const giniCoefficient = discriminatory_power?.gini?.gini_coefficient ?? 0;
         const ksStatistic = discriminatory_power?.ks_test?.ks_statistic ?? 0;
-    
+
         // Data for the table
         const metricData = [
             {
@@ -196,104 +178,102 @@ const PDModel: React.FC = () => {
                 result: ksStatistic >= ksThreshold ? "PASS" : "FAIL",
             },
         ];
-    
+
         // Define colors for dark theme visibility
         const lineColors = {
-            modelPerformance: "#00C4B4", // Bright teal for Model Performance (Gini)
-            randomModel: "#FFCA28", // Bright yellow for Random Model (Gini)
-            goodsCDF: "#42A5F5", // Bright blue for Goods CDF (KS)
-            badsCDF: "#FF7043", // Bright orange for Bads CDF (KS)
+            blue: "#42A5F5", // Bright blue for Model Performance (Gini)
+            yellow: "#FFCA28", // Bright yellow for Random Model (Gini)
         };
-    
+
         const textColor = isDarkMode ? "#E0E0E0" : "#000000"; // Light grey for dark mode, black for light mode
         const gridColor = isDarkMode ? "#616161" : "#CCCCCC"; // Lighter grey for dark mode grid
-    
+        const headerColor = isDarkMode ? '#FFE600' : 'black'
         return (
             <Box>
-                <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', mb: 2}}>
                     <Typography variant="h6" sx={{ mr: 2 }}>Binning by:</Typography>
-                    <Select value={sortingMethod} onChange={handleSortingChange} sx={{ minWidth: 200 }}>
+                    <Select value={sortingMethod} onChange={handleSortingChange} sx={{ minWidth: 200, backgroundColor: isDarkMode ? 'grey.600' : 'grey.200' }}>
                         <MenuItem value="PD_1_YR">PD 1 Year</MenuItem>
                         <MenuItem value="TTCReportingRating">Credit Rating</MenuItem>
                     </Select>
                 </Box>
                 {/* Table for Gini Coefficient and KS Statistic */}
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-                <Grid container spacing={2} justifyContent="center">
-                    {/* Gini Coefficient Table */}
-                    <Grid item xs={12} sm={6}>
-                        <TableContainer
-                            component={Paper}
-                            sx={{
-                                width: '100%',
-                            }}
-                        >
-                            <Table>
-                                <TableHead>
-                                    <TableRow>
-                                        <TableCell>Metrics</TableCell>
-                                        <TableCell align="right">Value</TableCell>
-                                        <TableCell align="right">Threshold</TableCell>
-                                        <TableCell align="right">Result</TableCell>
-                                    </TableRow>
-                                </TableHead>
-                                <TableBody>
-                                    <TableRow>
-                                        <TableCell>{metricData[0].metric}</TableCell>
-                                        <TableCell align="right">{metricData[0].value.toFixed(4)}</TableCell>
-                                        <TableCell align="right">{metricData[0].threshold.toFixed(4)}</TableCell>
-                                        <TableCell
-                                            align="right"
-                                            sx={{
-                                                color: metricData[0].result === "PASS" ? '#3cd644' : '#f54141',
-                                                fontWeight: "bold",
-                                            }}
-                                        >
-                                            {metricData[0].result}
-                                        </TableCell>
-                                    </TableRow>
-                                </TableBody>
-                            </Table>
-                        </TableContainer>
+                    <Grid container spacing={2} justifyContent="center">
+                        {/* Gini Coefficient Table */}
+                        <Grid item xs={12} sm={6}>
+                            <TableContainer
+                                component={Paper}
+                                sx={{
+                                    width: '100%',
+                                }}
+                            >
+                                <Table>
+                                    <TableHead>
+                                        <TableRow sx={{ backgroundColor: '#FFE600' }}>
+                                            <TableCell align="center" sx={{ fontWeight: 'bold', color: 'black' }}>Metrics</TableCell>
+                                            <TableCell align="center" sx={{ fontWeight: 'bold', color: 'black' }}>Value</TableCell>
+                                            <TableCell align="center" sx={{ fontWeight: 'bold', color: 'black' }}>Threshold</TableCell>
+                                            <TableCell align="center" sx={{ fontWeight: 'bold', color: 'black' }}>Result</TableCell>
+                                        </TableRow>
+                                    </TableHead>
+                                    <TableBody sx={{ backgroundColor: isDarkMode ? 'grey.600' : 'grey.200' }}>
+                                        <TableRow>
+                                            <TableCell align="center">{metricData[0].metric}</TableCell>
+                                            <TableCell align="center">{metricData[0].value.toFixed(4)}</TableCell>
+                                            <TableCell align="center">{metricData[0].threshold.toFixed(4)}</TableCell>
+                                            <TableCell
+                                                align="center"
+                                                sx={{
+                                                    backgroundColor: metricData[0].result === "PASS" ? '#04a60c' : '#f54141',
+                                                    fontWeight: "bold",
+                                                }}
+                                            >
+                                                {metricData[0].result}
+                                            </TableCell>
+                                        </TableRow>
+                                    </TableBody>
+                                </Table>
+                            </TableContainer>
+                        </Grid>
+                        {/* KS Statistic Table */}
+                        <Grid item xs={12} sm={6}>
+                            <TableContainer
+                                component={Paper}
+                                sx={{
+                                    width: '100%',
+                                }}
+                            >
+                                <Table>
+                                    <TableHead>
+                                        <TableRow sx={{ backgroundColor: '#FFE600' }}>
+                                            <TableCell align="center" sx={{ fontWeight: 'bold', color: 'black' }}>Metrics</TableCell>
+                                            <TableCell align="center" sx={{ fontWeight: 'bold', color: 'black' }}>Value</TableCell>
+                                            <TableCell align="center" sx={{ fontWeight: 'bold', color: 'black' }}>Threshold</TableCell>
+                                            <TableCell align="center" sx={{ fontWeight: 'bold', color: 'black' }}>Result</TableCell>
+                                        </TableRow>
+                                    </TableHead>
+                                    <TableBody  sx={{ backgroundColor: isDarkMode ? 'grey.600' : 'grey.200' }}>
+                                        <TableRow>
+                                            <TableCell align="center">{metricData[1].metric}</TableCell>
+                                            <TableCell align="center">{metricData[1].value.toFixed(4)}</TableCell>
+                                            <TableCell align="center">{metricData[1].threshold.toFixed(4)}</TableCell>
+                                            <TableCell
+                                                align="center"
+                                                sx={{
+                                                    backgroundColor: metricData[1].result === "PASS" ? '#04a60c' : '#f54141',
+                                                    fontWeight: "bold",
+                                                }}
+                                            >
+                                                {metricData[1].result}
+                                            </TableCell>
+                                        </TableRow>
+                                    </TableBody>
+                                </Table>
+                            </TableContainer>
+                        </Grid>
                     </Grid>
-                    {/* KS Statistic Table */}
-                    <Grid item xs={12} sm={6}>
-                        <TableContainer
-                            component={Paper}
-                            sx={{
-                                width: '100%', 
-                            }}
-                        >
-                            <Table>
-                                <TableHead>
-                                    <TableRow>
-                                        <TableCell>Metrics</TableCell>
-                                        <TableCell align="right">Value</TableCell>
-                                        <TableCell align="right">Threshold</TableCell>
-                                        <TableCell align="right">Result</TableCell>
-                                    </TableRow>
-                                </TableHead>
-                                <TableBody>
-                                    <TableRow>
-                                        <TableCell>{metricData[1].metric}</TableCell>
-                                        <TableCell align="right">{metricData[1].value.toFixed(4)}</TableCell>
-                                        <TableCell align="right">{metricData[1].threshold.toFixed(4)}</TableCell>
-                                        <TableCell
-                                            align="right"
-                                            sx={{
-                                                color: metricData[1].result === "PASS" ? '#3cd644' : '#f54141',
-                                                fontWeight: "bold",
-                                            }}
-                                        >
-                                            {metricData[1].result}
-                                        </TableCell>
-                                    </TableRow>
-                                </TableBody>
-                            </Table>
-                        </TableContainer>
-                    </Grid>
-                </Grid>
-            </Box>
+                </Box>
                 <Grid container spacing={2}>
                     <Grid item xs={12} md={6}>
                         <Typography variant="h6">Gini Coefficient</Typography>
@@ -317,15 +297,15 @@ const PDModel: React.FC = () => {
                                     verticalAlign="top"
                                     align="left"
                                     wrapperStyle={{
-                                    color: textColor,
-                                    paddingLeft: 50,
-                                    paddingTop: -15,
-                                }}
-                            />
+                                        color: textColor,
+                                        paddingLeft: 50,
+                                        paddingTop: -15,
+                                    }}
+                                />
                                 <Line
                                     type="monotone"
                                     dataKey="y"
-                                    stroke={lineColors.modelPerformance}
+                                    stroke={lineColors.blue}
                                     strokeWidth={2}
                                     dot={false}
                                     name="Model Performance"
@@ -334,7 +314,7 @@ const PDModel: React.FC = () => {
                                     data={randomModelData}
                                     type="monotone"
                                     dataKey="y"
-                                    stroke={lineColors.randomModel}
+                                    stroke={lineColors.yellow}
                                     strokeWidth={2}
                                     strokeDasharray="5 5"
                                     dot={false}
@@ -346,6 +326,8 @@ const PDModel: React.FC = () => {
                                         color: isDarkMode ? theme.palette.text.primary : 'black',
                                         border: `1px solid ${gridColor}`,
                                     }}
+                                    formatter={(value: number) => value.toFixed(4)}
+                                    labelFormatter={() => ''}
                                 />
                             </LineChart>
                         </ResponsiveContainer>
@@ -372,15 +354,15 @@ const PDModel: React.FC = () => {
                                     verticalAlign="top"
                                     align="right"
                                     wrapperStyle={{
-                                    color: textColor,
-                                    paddingLeft: 50, // Adjust to avoid overlap with Y-axis
-                                    paddingTop: 5, // Position inside the plot
-                                }}
-                            />
+                                        color: textColor,
+                                        paddingLeft: 50,
+                                        paddingTop: 5,
+                                    }}
+                                />
                                 <Line
                                     type="monotone"
                                     dataKey="good_cdf"
-                                    stroke={lineColors.goodsCDF}
+                                    stroke={lineColors.yellow}
                                     strokeWidth={2}
                                     name="Goods CDF"
                                     dot={false}
@@ -388,7 +370,7 @@ const PDModel: React.FC = () => {
                                 <Line
                                     type="monotone"
                                     dataKey="bad_cdf"
-                                    stroke={lineColors.badsCDF}
+                                    stroke={lineColors.blue}
                                     strokeWidth={2}
                                     name="Bads CDF"
                                     dot={false}
@@ -406,6 +388,8 @@ const PDModel: React.FC = () => {
                                         color: isDarkMode ? theme.palette.text.primary : 'black',
                                         border: `1px solid ${gridColor}`,
                                     }}
+                                    formatter={(value: number) => value.toFixed(4)}
+                                    labelFormatter={() => ''}
                                 />
                             </LineChart>
                         </ResponsiveContainer>
@@ -419,26 +403,27 @@ const PDModel: React.FC = () => {
         if (!pdAnalysisResults?.stability?.psi) return <Typography>No Stability Index (PSI) available</Typography>;
 
         const { psi_total, bin_details } = pdAnalysisResults.stability.psi;
+        const headerColor = isDarkMode ? '#FFE600' : 'black'
         return (
             <Paper sx={{ p: 2 }}>
                 <Typography variant="h6">Population Stability Index (PSI)</Typography>
                 <Table size="small">
                     <TableBody>
                         <TableRow>
-                            <TableCell>Total PSI</TableCell>
+                            <TableCell sx={{ fontWeight: 'bold', color: headerColor }}>Total PSI</TableCell>
                             <TableCell>{psi_total !== undefined ? `${(psi_total * 100).toFixed(2)}%` : 'N/A'}</TableCell>
                         </TableRow>
                         <TableRow>
-                            <TableCell>PSI by Rating</TableCell>
+                            <TableCell sx={{ fontWeight: 'bold', color: headerColor }}>PSI by Rating</TableCell>
                             <TableCell>
                                 {bin_details ? (
                                     <Table size="small">
                                         <TableHead>
                                             <TableRow>
-                                                <TableCell>Rating</TableCell>
-                                                <TableCell>Baseline %</TableCell>
-                                                <TableCell>Current %</TableCell>
-                                                <TableCell>PSI</TableCell>
+                                                <TableCell sx={{ fontWeight: 'bold', color: headerColor }}>Rating</TableCell>
+                                                <TableCell sx={{ fontWeight: 'bold', color: headerColor }}>Baseline %</TableCell>
+                                                <TableCell sx={{ fontWeight: 'bold', color: headerColor }}>Current %</TableCell>
+                                                <TableCell sx={{ fontWeight: 'bold', color: headerColor }}>PSI</TableCell>
                                             </TableRow>
                                         </TableHead>
                                         <TableBody>
@@ -456,7 +441,7 @@ const PDModel: React.FC = () => {
                             </TableCell>
                         </TableRow>
                         <TableRow>
-                            <TableCell>Interpretation</TableCell>
+                            <TableCell sx={{ fontWeight: 'bold', color: headerColor }}>Interpretation</TableCell>
                             <TableCell>
                                 <Box sx={{ display: 'flex', alignItems: 'center' }}>
                                     {psi_total !== undefined ? (psi_total < 0.1 ? 'No significant population change' : psi_total < 0.2 ? 'Moderate population change' : 'Significant population change') : 'N/A'}
@@ -476,6 +461,7 @@ const PDModel: React.FC = () => {
         if (!pdAnalysisResults?.calibration) return <Typography color="error">No Calibration Data Available</Typography>;
 
         const { hosmer_lemeshow } = pdAnalysisResults.calibration;
+        const headerColor = isDarkMode ? '#FFE600' : 'black'
         return (
             <Grid container spacing={2}>
                 <Grid item xs={12}>
@@ -485,13 +471,13 @@ const PDModel: React.FC = () => {
                             <Table>
                                 <TableHead>
                                     <TableRow>
-                                        <TableCell>Rating Category</TableCell>
-                                        <TableCell align="right">Total Samples</TableCell>
-                                        <TableCell align="right">Observed Defaults</TableCell>
-                                        <TableCell align="right">Observed Default Prob (%)</TableCell>
-                                        <TableCell align="right">Expected Default Prob (%)</TableCell>
-                                        <TableCell align="right">P-Value</TableCell>
-                                        <TableCell align="right">Test Result</TableCell>
+                                        <TableCell sx={{ fontWeight: 'bold', color: headerColor }}>Rating Category</TableCell>
+                                        <TableCell align="right" sx={{ fontWeight: 'bold', color: headerColor }}>Total Samples</TableCell>
+                                        <TableCell align="right" sx={{ fontWeight: 'bold', color: headerColor }}>Observed Defaults</TableCell>
+                                        <TableCell align="right" sx={{ fontWeight: 'bold', color: headerColor }}>Observed Default Prob (%)</TableCell>
+                                        <TableCell align="right" sx={{ fontWeight: 'bold', color: headerColor }}>Expected Default Prob (%)</TableCell>
+                                        <TableCell align="right" sx={{ fontWeight: 'bold', color: headerColor }}>P-Value</TableCell>
+                                        <TableCell align="center" sx={{ fontWeight: 'bold', color: headerColor }}>Test Result</TableCell>
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>
@@ -503,7 +489,10 @@ const PDModel: React.FC = () => {
                                             <TableCell align="right">{typeof test.observed_defaults === 'number' && typeof test.total_samples === 'number' ? `${((test.observed_defaults / test.total_samples) * 100).toFixed(2)}%` : 'N/A'}</TableCell>
                                             <TableCell align="right">{typeof test.expected_default_prob === 'number' ? `${(test.expected_default_prob * 100).toFixed(2)}%` : 'N/A'}</TableCell>
                                             <TableCell align="right">{typeof test.p_value === 'number' ? test.p_value.toFixed(4) : 'N/A'}</TableCell>
-                                            <TableCell align="right" sx={{color: test.test_result === "PASS" ? '#3cd644' : '#f54141',fontWeight: "bold"}}>{test.test_result || 'N/A'}</TableCell>
+                                            <TableCell align="center" sx={{
+                                                backgroundColor: test.test_result === "PASS" ? '#04a60c' : '#f54141',
+                                                fontWeight: "bold",
+                                            }}>{test.test_result || 'N/A'}</TableCell>
                                         </TableRow>
                                     ))}
                                 </TableBody>
@@ -520,19 +509,23 @@ const PDModel: React.FC = () => {
                             <Table size="small">
                                 <TableBody>
                                     <TableRow>
-                                        <TableCell>P-Value</TableCell>
-                                        <TableCell>{typeof hosmer_lemeshow.p_value === 'number' ? hosmer_lemeshow.p_value.toFixed(4) : 'N/A'}</TableCell>
+                                        <TableCell sx={{ fontWeight: 'bold', color: headerColor }}>P-Value</TableCell>
+                                        <TableCell sx={{ fontWeight: 'bold', color: headerColor }}>Degrees of Freedom</TableCell>
+                                        <TableCell sx={{ fontWeight: 'bold', color: headerColor }}>Test Result (alpha = 0.05)</TableCell>
                                     </TableRow>
                                     <TableRow>
-                                        <TableCell>Degrees of Freedom</TableCell>
+                                        <TableCell>{typeof hosmer_lemeshow.p_value === 'number' ? hosmer_lemeshow.p_value.toFixed(4) : 'N/A'}</TableCell>
                                         <TableCell>{hosmer_lemeshow.degrees_of_freedom ?? 'N/A'}</TableCell>
+                                        {typeof hosmer_lemeshow.p_value === 'number' && (
+
+
+                                            <TableCell sx={{
+                                                backgroundColor: hosmer_lemeshow.p_value >= 0.05 ? '#04a60c' : '#f54141',
+                                                fontWeight: "bold",
+                                            }}>{hosmer_lemeshow.p_value >= 0.05 ? 'PASS' : 'FAIL'}</TableCell>
+                                        )}
                                     </TableRow>
-                                    {typeof hosmer_lemeshow.p_value === 'number' && (
-                                        <TableRow>
-                                            <TableCell>Test Result (alpha = 0.05)</TableCell>
-                                            <TableCell sx={{ color: hosmer_lemeshow.p_value >= 0.05 ? '#3cd644' : '#f54141', fontWeight: "bold"}}>{hosmer_lemeshow.p_value >= 0.05 ? 'PASS' : 'FAIL'}</TableCell>
-                                        </TableRow>
-                                    )}
+
                                 </TableBody>
                             </Table>
                         </TableContainer>
@@ -599,35 +592,40 @@ const PDModel: React.FC = () => {
             return {
                 x: formattedX,
                 y: item.y !== undefined ? item.y : (item.woe !== undefined ? item.woe : 0),
-                label: isCategorical 
-                    ? (item.label || item.bin_range || `Category ${i}`) 
-                    : (item.label 
-                        ? (typeof item.label === 'number' ? Number(item.label).toFixed(2) : item.label) 
+                label: isCategorical
+                    ? (item.label || item.bin_range || `Category ${i}`)
+                    : (item.label
+                        ? (typeof item.label === 'number' ? Number(item.label).toFixed(2) : item.label)
                         : (item.bin_range || (typeof formattedX === 'number' ? formattedX.toFixed(2) : `Bin ${i}`))),
             };
         });
 
         return (
-            <ResponsiveContainer width="100%" height={300}>
+            <ResponsiveContainer width="100%" height={400}>
                 <LineChart data={normalizedData}>
                     <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis 
-                        dataKey="label" 
-                        type={isCategorical ? "category" : "number"} 
-                        domain={isCategorical ? ['auto', 'auto'] : [Math.min(...normalizedData.map(d => Number(d.x))), Math.max(...normalizedData.map(d => Number(d.x)))]} 
-                        interval={0} 
-                        angle={isCategorical ? -45 : 0} 
-                        height={isCategorical ? 80 : 40} 
-                        tick={{ fontSize: 10, transform: isCategorical ? 'translate(0, 10)' : undefined }}
-                        label={{ value: isCategorical ? 'Categories' : 'Mean Value', position: 'insideBottom', offset: isCategorical ? -15 : -5 }}
+                    <XAxis
+                        dataKey="label"
+                        type={isCategorical ? "category" : "number"}
+                        domain={isCategorical ? ['auto', 'auto'] : [Math.min(...normalizedData.map(d => Number(d.x))), Math.max(...normalizedData.map(d => Number(d.x)))]}
+                        interval={0}
+                        angle={isCategorical ? -45 : 0}
+                        height={isCategorical ? 80 : 40}
+                        stroke={isDarkMode ? "#E0E0E0" : "#000000"}
+                        tick={{ fill: isDarkMode ? "#E0E0E0" : "#000000", transform: isCategorical ? 'translate(0, 10)' : undefined }}
+                        label={{ value: isCategorical ? 'Categories' : 'Mean Value', position: 'insideBottom', offset: -5, fill: isDarkMode ? "#E0E0E0" : "#000000" }}
                         tickFormatter={isCategorical ? undefined : (value) => typeof value === 'number' ? value.toFixed(2) : value}
                     />
-                    <YAxis label={{ value: 'Weight of Evidence (WOE)', angle: -90, position: 'insideLeft' }} />
-                    <RechartsTooltip 
+                    <YAxis
+                        label={{ value: 'Weight of Evidence (WOE)', angle: -90, dy: 90, position: 'insideLeft', fill: isDarkMode ? "#E0E0E0" : "#000000", }}
+                        stroke={isDarkMode ? "#E0E0E0" : "#000000"}
+                        tick={{ fill: isDarkMode ? "#E0E0E0" : "#000000" }}
+                    />
+                    <RechartsTooltip
                         contentStyle={{ backgroundColor: isDarkMode ? theme.palette.background.paper : 'white', color: isDarkMode ? theme.palette.text.primary : 'black' }}
                         formatter={(value: number) => value.toFixed(4)}
                     />
-                    <Line type="monotone" dataKey="y" stroke="#8884d8" strokeWidth={2} dot={{ r: 5 }} activeDot={{ r: 8 }} />
+                    <Line type="monotone" dataKey="y" stroke= "#42A5F5" strokeWidth={2} dot={{ r: 5 }} activeDot={{ r: 8 }} />
                 </LineChart>
             </ResponsiveContainer>
         );
@@ -645,7 +643,7 @@ const PDModel: React.FC = () => {
             <TableBody>
                 {vars.map(([name, data]) => (
                     <TableRow key={name}>
-                        <TableCell>{name}</TableCell>
+                        <TableCell >{name}</TableCell>
                         <TableCell>{data.iv?.iv_total?.toFixed(4) || 'N/A'}</TableCell>
                         <TableCell>{data.csi_total !== undefined ? `${(data.csi_total * 100).toFixed(2)}%` : 'N/A'}</TableCell>
                     </TableRow>
@@ -680,19 +678,19 @@ const PDModel: React.FC = () => {
                                         <Table size="small">
                                             <TableHead>
                                                 <TableRow>
-                                                    <TableCell>Bin</TableCell>
-                                                    <TableCell>Total Count</TableCell>
-                                                    <TableCell>Default Count</TableCell>
-                                                    <TableCell>Non-Default Count</TableCell>
-                                                    <TableCell>WOE</TableCell>
-                                                    <TableCell>IV</TableCell>
+                                                    <TableCell sx={{ fontWeight: 'bold', color: headerColor }}>Bin</TableCell>
+                                                    <TableCell sx={{ fontWeight: 'bold', color: headerColor }}>Total Count</TableCell>
+                                                    <TableCell sx={{ fontWeight: 'bold', color: headerColor }}>Default Count</TableCell>
+                                                    <TableCell sx={{ fontWeight: 'bold', color: headerColor }}>Non-Default Count</TableCell>
+                                                    <TableCell sx={{ fontWeight: 'bold', color: headerColor }}>WOE</TableCell>
+                                                    <TableCell sx={{ fontWeight: 'bold', color: headerColor }}>IV</TableCell>
                                                 </TableRow>
                                             </TableHead>
                                             <TableBody>
                                                 {data.iv?.details?.bins?.map((bin: any, i: number) => {
                                                     const woeValue = bin.woe || data.iv?.details?.woe?.[i] || 0;
                                                     const ivBinValue = data.iv?.details?.bin_details?.iv_per_bin?.[i] || bin.iv_bin || 0;
-                                                    let binLabel = isCategorical 
+                                                    let binLabel = isCategorical
                                                         ? (woeData[i]?.label || bin.bin_range || `Category ${i}`)
                                                         : (bin.bin_range || (data.csi_bin_details && data.csi_bin_details[String(i)]?.bin_range) || `Bin ${i}`);
                                                     const totalCount = bin.total_count || 0;
@@ -718,7 +716,7 @@ const PDModel: React.FC = () => {
                     </Grid>
                 );
             });
-
+        const headerColor = isDarkMode ? '#FFE600' : 'black'
         return (
             <Grid container spacing={2}>
                 <Grid item xs={12}>
@@ -738,9 +736,9 @@ const PDModel: React.FC = () => {
                                 <Table size="small">
                                     <TableHead>
                                         <TableRow>
-                                            <TableCell>Variable</TableCell>
-                                            <TableCell>Information Value (IV)</TableCell>
-                                            <TableCell>Characteristic Stability Index (CSI)</TableCell>
+                                            <TableCell sx={{ fontWeight: 'bold', color: headerColor }}>Variable</TableCell>
+                                            <TableCell sx={{ fontWeight: 'bold', color: headerColor }}>Information Value (IV)</TableCell>
+                                            <TableCell sx={{ fontWeight: 'bold', color: headerColor }}>Characteristic Stability Index (CSI)</TableCell>
                                         </TableRow>
                                     </TableHead>
                                     {renderTable(filteredNumeric)}
@@ -759,9 +757,9 @@ const PDModel: React.FC = () => {
                                 <Table size="small">
                                     <TableHead>
                                         <TableRow>
-                                            <TableCell>Variable</TableCell>
-                                            <TableCell>Information Value (IV)</TableCell>
-                                            <TableCell>Characteristic Stability Index (CSI)</TableCell>
+                                            <TableCell sx={{ fontWeight: 'bold', color: headerColor }}>Variable</TableCell>
+                                            <TableCell sx={{ fontWeight: 'bold', color: headerColor }}>Information Value (IV)</TableCell>
+                                            <TableCell sx={{ fontWeight: 'bold', color: headerColor }}>Characteristic Stability Index (CSI)</TableCell>
                                         </TableRow>
                                     </TableHead>
                                     {renderTable(filteredCategorical)}
